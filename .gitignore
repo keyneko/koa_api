@@ -1,2 +1,23 @@
+.DS_Store
 node_modules/
-app/.DS_Store
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+**/*.log
+**/*.mp4
+
+reports
+cypress/report
+tests/**/coverage/
+tests/e2e/reports
+selenium-debug.log
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.local
