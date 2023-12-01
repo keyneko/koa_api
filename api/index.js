@@ -5,7 +5,7 @@ const authRoutes = require('./routes/authRoutes')
 const blogRoutes = require('./routes/blogRoutes')
 
 const app = new Koa()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 const MONGODB_URI = 'mongodb://localhost:27017/test'
 
 // Connect to MongoDB
@@ -24,6 +24,6 @@ app.use(authRoutes.routes())
 app.use(blogRoutes.routes())
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })

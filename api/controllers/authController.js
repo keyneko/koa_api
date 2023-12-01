@@ -41,8 +41,9 @@ function captcha(ctx) {
     timestamp: Date.now(),
   }
 
-  ctx.type = 'svg'
+  ctx.status = 200
   ctx.body = {
+    code: 200,
     captchaId,
     captcha: captcha.data,
   }
@@ -54,10 +55,10 @@ async function register(ctx) {
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = 400
+    ctx.status = 200
     ctx.body = {
-      code: 400,
-      message: 'Invalid captcha',
+      code: 501,
+      message: '无效的验证码',
     }
     return
   }
@@ -68,10 +69,10 @@ async function register(ctx) {
     // Check if the username already exists
     const existingUser = await User.findOne({ username })
     if (existingUser) {
-      ctx.status = 409 // Conflict
+      ctx.status = 200
       ctx.body = {
-        code: 409,
-        message: 'Username already exists',
+        code: 502,
+        message: '用户名已存在',
       }
       return
     }
@@ -90,17 +91,17 @@ async function register(ctx) {
 
     const token = generateToken(newUser) // Generate JWT
 
-    ctx.status = 201 // Created
+    ctx.status = 200
     ctx.body = {
       code: 200,
-      message: 'Registration successful',
+      message: '注册成功',
       token,
     }
   } catch (error) {
-    ctx.status = 500 // Internal Server Error
+    ctx.status = 200
     ctx.body = {
       code: 500,
-      message: 'An error occurred during registration',
+      message: '服务器发生错误',
     }
   }
 }
@@ -111,10 +112,10 @@ async function login(ctx) {
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = 400
+    ctx.status = 200
     ctx.body = {
-      code: 400,
-      message: 'Invalid captcha',
+      code: 501,
+      message: '无效的验证码',
     }
     return
   }
@@ -129,24 +130,24 @@ async function login(ctx) {
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user) // Generate JWT
 
-      ctx.status = 200 // OK
+      ctx.status = 200
       ctx.body = {
         code: 200,
-        message: 'Login successful',
+        message: '登录成功',
         token,
       }
     } else {
-      ctx.status = 401 // Unauthorized
+      ctx.status = 200
       ctx.body = {
-        code: 401,
-        message: 'Invalid credentials',
+        code: 503,
+        message: '帐号或密码有误',
       }
     }
   } catch (error) {
-    ctx.status = 500 // Internal Server Error
+    ctx.status = 200
     ctx.body = {
       code: 500,
-      message: 'An error occurred during login',
+      message: '服务器发生错误',
     }
   }
 }
