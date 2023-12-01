@@ -11,4 +11,7 @@ authRouter.post('/register', authController.register)
 // 登录
 authRouter.post('/login', authController.login)
 
+// 登出
+authRouter.post('/logout', authController.logout)
+
 module.exports = authRouter

@@ -152,8 +152,41 @@ async function login(ctx) {
   }
 }
 
+async function logout(ctx) {
+  const authorizationHeader = ctx.headers.authorization
+
+  // 验证 token 是否存在
+  if (!authorizationHeader) {
+    ctx.status = 200
+    ctx.body = {
+      code: 504,
+      message: 'Unauthorized: Missing Authorization header',
+    }
+    return
+  }
+
+  // 解析出 Token
+  const [bearer, token] = authorizationHeader.split(' ')
+
+  if (bearer !== 'Bearer' || !token) {
+    ctx.status = 200
+    ctx.body = {
+      code: 504,
+      message: 'Unauthorized: Invalid Authorization header format',
+    }
+    return
+  }
+
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    message: '登出成功',
+  }
+}
+
 module.exports = {
   captcha,
   register,
   login,
+  logout,
 }
