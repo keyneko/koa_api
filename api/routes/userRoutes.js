@@ -85,11 +85,25 @@ userRouter.delete('/user/:id', authController.isAdmin, async (ctx) => {
   try {
     const userId = ctx.params.id
 
-    const result = await User.findByIdAndDelete(userId)
+    // Check if the user being deleted is an admin
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      ctx.status = 404;
+      ctx.body = 'User not found';
+      return;
+    }
+
+    if (userToDelete.username === 'admin') {
+      ctx.status = 403;
+      ctx.body = 'Forbidden: Cannot delete admin accounts';
+      return;
+    }
+
+    const result = await User.findByIdAndDelete(userId);
     if (!result) {
-      ctx.status = 404
-      ctx.body = 'User not found'
-      return
+      ctx.status = 404;
+      ctx.body = 'User not found';
+      return;
     }
 
     ctx.status = 200
