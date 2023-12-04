@@ -2,6 +2,7 @@ const Koa = require('koa')
 const { koaBody } = require('koa-body')
 const mongoose = require('mongoose')
 const authRoutes = require('./routes/authRoutes')
+const userRoutes = require('./routes/userRoutes')
 const blogRoutes = require('./routes/blogRoutes')
 
 const app = new Koa()
@@ -21,6 +22,7 @@ app.use(
 
 // Routes
 app.use(authRoutes.routes())
+app.use(userRoutes.routes())
 app.use(blogRoutes.routes())
 
 // Start the server
