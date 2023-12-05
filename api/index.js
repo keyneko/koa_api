@@ -1,9 +1,12 @@
+const path = require('path')
 const Koa = require('koa')
 const { koaBody } = require('koa-body')
+const koaStatic = require('koa-static')
 const mongoose = require('mongoose')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const blogRoutes = require('./routes/blogRoutes')
+const fileRoutes = require('./routes/fileRoutes')
 
 const app = new Koa()
 const PORT = process.env.PORT || 4000
@@ -12,11 +15,19 @@ const MONGODB_URI = 'mongodb://localhost:27017/test'
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
+// 静态文件服务
+app.use(koaStatic(path.join(process.cwd(), "/public")))
+
 // Middleware
 app.use(
   koaBody({
     multipart: true,
-    formidable: { maxFieldsSize: 5 * 1024 * 1024 },
+    formidable: {
+      // 是否保留拓展名
+      keepExtensions: true,
+      // 限制文件大小
+      maxFieldsSize: 5 * 1024 * 1024,
+    },
   }),
 )
 
@@ -24,6 +35,7 @@ app.use(
 app.use(authRoutes.routes())
 app.use(userRoutes.routes())
 app.use(blogRoutes.routes())
+app.use(fileRoutes.routes())
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {

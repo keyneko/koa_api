@@ -43,7 +43,7 @@ function generateToken(user) {
   }
 
   // Sign the JWT token
-  return jwt.sign(payload, secretKey, { expiresIn: '1h' }) // Adjust the expiration time as needed
+  return jwt.sign(payload, secretKey, { expiresIn: '24h' }) // Adjust the expiration time as needed
 }
 
 function verifyToken(token) {
