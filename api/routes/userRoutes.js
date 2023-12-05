@@ -8,18 +8,25 @@ const { statusCodes } = require('../statusCodes')
 // Get all users (accessible only to admins)
 userRouter.get('/users', authController.isAdmin, async (ctx) => {
   try {
-    const users = await User.find()
+    const users = await User.find().select([
+      'username',
+      'name',
+      'avatar',
+      'roles',
+    ])
+
+    // Add the 'token' field to each user object
+    const usersWithToken = users.map((user) => {
+      return {
+        ...user.toObject(),
+        token: authController.generateToken(user),
+      }
+    })
+
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: users.map((user) => ({
-        id: user.id,
-        username: user.username,
-        token: authController.generateToken(user),
-        name: user.name,
-        avatar: user.avatar,
-        roles: user.roles,
-      })),
+      data: usersWithToken,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError.code
@@ -31,7 +38,12 @@ userRouter.get('/users', authController.isAdmin, async (ctx) => {
 userRouter.get('/user', authController.hasToken, async (ctx) => {
   try {
     const userId = ctx.request.query.id || ctx.state.decoded.userId
-    const user = await User.findById(userId)
+    const user = await User.findById(userId).select([
+      'username',
+      'name',
+      'avatar',
+      'roles',
+    ])
 
     if (!user) {
       ctx.status = statusCodes.NotFound.code
@@ -42,13 +54,7 @@ userRouter.get('/user', authController.hasToken, async (ctx) => {
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: {
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        avatar: user.avatar,
-        roles: user.roles,
-      },
+      data: user,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError.code

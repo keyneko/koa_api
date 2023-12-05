@@ -22,6 +22,7 @@ const statusCodes = {
     messages: {
       default: 'Not Found',
       userNotFound: 'User Not Found',
+      barcodeNotFound: 'Barcode Not Found',
     },
   },
 
