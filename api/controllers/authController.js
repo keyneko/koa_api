@@ -3,8 +3,9 @@ const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
 const TokenBlacklist = require('../models/tokenBlacklist')
+const { statusCodes } = require('../statusCodes')
 
-const secretKey = 'your-secret-key' // Replace with a secure key for signing JWT
+const secretKey = 'your-secret-key'
 
 // 存储验证码文本和对应的验证码ID的对象
 const captchaStore = {}
@@ -58,15 +59,15 @@ function verifyToken(token) {
 const hasToken = async (ctx, next) => {
   const token = ctx.headers.authorization
   if (!token) {
-    ctx.status = 401
-    ctx.body = 'Unauthorized: Missing token'
+    ctx.status = statusCodes.Unauthorized.code
+    ctx.body = statusCodes.Unauthorized.messages.missingToken
     return
   }
 
   const decoded = await verifyToken(token)
   if (!decoded) {
-    ctx.status = 401
-    ctx.body = 'Unauthorized: Invalid token'
+    ctx.status = statusCodes.Unauthorized.code
+    ctx.body = statusCodes.Unauthorized.messages.invalidToken
     return
   }
 
@@ -82,8 +83,8 @@ const isAdmin = async (ctx, next) => {
   const decoded = await verifyToken(token)
 
   if (!decoded || decoded.username !== 'admin') {
-    ctx.status = 403
-    ctx.body = 'Permission denied'
+    ctx.status = statusCodes.Forbidden.code
+    ctx.body = statusCodes.Forbidden.messages.adminOnly
     return
   }
 
@@ -122,8 +123,8 @@ async function register(ctx) {
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = 501
-    ctx.body = '无效的验证码'
+    ctx.status = statusCodes.InvalidCaptcha.code
+    ctx.body = statusCodes.InvalidCaptcha.messages.default
     return
   }
   // 清除验证码
@@ -133,8 +134,8 @@ async function register(ctx) {
     // Check if the username already exists
     const existingUser = await User.findOne({ username })
     if (existingUser) {
-      ctx.status = 502
-      ctx.body = '用户名已存在'
+      ctx.status = statusCodes.UserExists.code
+      ctx.body = statusCodes.UserExists.messages.default
       return
     }
 
@@ -155,12 +156,11 @@ async function register(ctx) {
     ctx.status = 200
     ctx.body = {
       code: 200,
-      message: '注册成功',
       token,
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 }
 
@@ -170,8 +170,8 @@ async function login(ctx) {
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = 501
-    ctx.body = '无效的验证码'
+    ctx.status = statusCodes.InvalidCaptcha.code
+    ctx.body = statusCodes.InvalidCaptcha.messages.default
     return
   }
   // 清除验证码
@@ -182,22 +182,26 @@ async function login(ctx) {
     const user = await User.findOne({ username })
 
     // Check if the user exists and verify the password
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const token = generateToken(user) // Generate JWT
+    if (user) {
+      if (await bcrypt.compare(password, user.password)) {
+        const token = generateToken(user) // Generate JWT
 
-      ctx.status = 200
-      ctx.body = {
-        code: 200,
-        message: '登录成功',
-        token,
+        ctx.status = 200
+        ctx.body = {
+          code: 200,
+          token,
+        }
+      } else {
+        ctx.status = statusCodes.PasswordError.code
+        ctx.body = statusCodes.PasswordError.messages.default
       }
     } else {
-      ctx.status = 503
-      ctx.body = '帐号或密码有误'
+      ctx.status = statusCodes.NotFound.code
+      ctx.body = statusCodes.NotFound.messages.userNotFound
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = '服务器发生错误'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 }
 
@@ -209,8 +213,8 @@ async function logout(ctx) {
     const isTokenBlacklisted = await TokenBlacklist.findOne({ token })
 
     if (isTokenBlacklisted) {
-      ctx.status = 401
-      ctx.body = 'Unauthorized: Token has already been invalidated'
+      ctx.status = statusCodes.Unauthorized.code
+      ctx.body = statusCodes.Unauthorized.messages.invalidToken
       return
     }
 
@@ -221,11 +225,10 @@ async function logout(ctx) {
     ctx.status = 200
     ctx.body = {
       code: 200,
-      message: '登出成功',
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = '服务器发生错误'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 }
 

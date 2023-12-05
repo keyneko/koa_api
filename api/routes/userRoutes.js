@@ -3,6 +3,7 @@ const Router = require('koa-router')
 const userRouter = new Router()
 const User = require('../models/user')
 const authController = require('../controllers/authController')
+const { statusCodes } = require('../statusCodes')
 
 // Get all users (accessible only to admins)
 userRouter.get('/users', authController.isAdmin, async (ctx) => {
@@ -21,8 +22,8 @@ userRouter.get('/users', authController.isAdmin, async (ctx) => {
       })),
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 })
 
@@ -33,8 +34,8 @@ userRouter.get('/user', authController.hasToken, async (ctx) => {
     const user = await User.findById(userId)
 
     if (!user) {
-      ctx.status = 404
-      ctx.body = 'User not found'
+      ctx.status = statusCodes.NotFound.code
+      ctx.body = statusCodes.NotFound.messages.userNotFound
       return
     }
 
@@ -50,8 +51,8 @@ userRouter.get('/user', authController.hasToken, async (ctx) => {
       },
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 })
 
@@ -63,8 +64,8 @@ userRouter.put('/user', authController.hasToken, async (ctx) => {
     const user = await User.findById(userId)
 
     if (!user) {
-      ctx.status = 404
-      ctx.body = 'User not found'
+      ctx.status = statusCodes.NotFound.code
+      ctx.body = statusCodes.NotFound.messages.userNotFound
       return
     }
 
@@ -76,8 +77,8 @@ userRouter.put('/user', authController.hasToken, async (ctx) => {
           user.password = hashedPassword
         }
       } else {
-        ctx.status = 500
-        ctx.body = '原密码错误'
+        ctx.status = statusCodes.PasswordError.code
+        ctx.body = statusCodes.PasswordError.messages.invalidOriginalPassword
         return
       }
     }
@@ -92,34 +93,34 @@ userRouter.put('/user', authController.hasToken, async (ctx) => {
       code: 200,
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 })
 
 // Delete a user by ID (accessible only to admins)
 userRouter.delete('/user', authController.isAdmin, async (ctx) => {
   try {
-    const userId = ctx.request.body.id
+    const userId = ctx.query.id
 
     // Check if the user being deleted is an admin
     const userToDelete = await User.findById(userId)
     if (!userToDelete) {
-      ctx.status = 404
-      ctx.body = 'User not found'
+      ctx.status = statusCodes.NotFound.code
+      ctx.body = statusCodes.NotFound.messages.userNotFound
       return
     }
 
     if (userToDelete.username === 'admin') {
-      ctx.status = 500
-      ctx.body = 'Forbidden: Cannot delete admin accounts'
+      ctx.status = statusCodes.Forbidden.code
+      ctx.body = statusCodes.Forbidden.messages.cannotDeleteAdmin
       return
     }
 
     const result = await User.findByIdAndDelete(userId)
     if (!result) {
-      ctx.status = 404
-      ctx.body = 'User not found'
+      ctx.status = statusCodes.NotFound.code
+      ctx.body = statusCodes.NotFound.messages.userNotFound
       return
     }
 
@@ -128,8 +129,8 @@ userRouter.delete('/user', authController.isAdmin, async (ctx) => {
       code: 200,
     }
   } catch (error) {
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    ctx.status = statusCodes.InternalServerError.code
+    ctx.body = statusCodes.InternalServerError.messages.default
   }
 })
 
