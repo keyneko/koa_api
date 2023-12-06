@@ -54,18 +54,24 @@ async function generateBarcode(categoryCode) {
 
 async function getBarcodes(ctx) {
   try {
-    const barcodes = await Barcode.find().select([
-      'value',
-      'name',
-      'quantity',
-      'basicUnit',
-      'status',
+    const { pageNum = 1, pageSize = 10 } = ctx.query
+
+    const skip = (pageNum - 1) * pageSize
+    const limit = parseInt(pageSize)
+
+    const [barcodes, total] = await Promise.all([
+      Barcode.find()
+        .select(['value', 'name', 'quantity', 'basicUnit', 'status'])
+        .skip(skip)
+        .limit(limit),
+      Barcode.countDocuments(),
     ])
 
     ctx.status = 200
     ctx.body = {
       code: 200,
       data: barcodes,
+      total,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError.code
