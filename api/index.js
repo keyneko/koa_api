@@ -42,7 +42,7 @@ app.use(fileRoutes.routes())
 app.use(barcodeRoutes.routes())
 app.use(dictionaryRoutes.routes())
 
-require('./models/_run')
+require('./sqls')
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {
