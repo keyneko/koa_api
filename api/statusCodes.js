@@ -23,6 +23,7 @@ const statusCodes = {
       default: 'Not Found',
       userNotFound: 'User Not Found',
       barcodeNotFound: 'Barcode Not Found',
+      dictionariesNotFound: 'Dictionaries Not Found',
     },
   },
 

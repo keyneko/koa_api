@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const fileRoutes = require('./routes/fileRoutes')
 const barcodeRoutes = require('./routes/barcodeRoutes')
+const dictionaryRoutes = require('./routes/dictionaryRoutes')
 
 const app = new Koa()
 const PORT = process.env.PORT || 4000
@@ -39,6 +40,7 @@ app.use(authRoutes.routes())
 app.use(userRoutes.routes())
 app.use(fileRoutes.routes())
 app.use(barcodeRoutes.routes())
+app.use(dictionaryRoutes.routes())
 
 require('./models/_run')
 

@@ -45,9 +45,7 @@ async function generateBarcode(categoryCode) {
 
   // Calculate the next incremental number
   const nextIncrementalNumber =
-    (lastBarcode.length > 0
-      ? parseInt(lastBarcode[0].value.slice(-4), 10)
-      : 0) + 1
+    (lastBarcode.length > 0 ? parseInt(lastBarcode[0].value.slice(-4), 10) : 0) + 1
 
   // Combine components to form the complete barcode value
   const barcodeValue = `${category}${dateCode}${nextIncrementalNumber
@@ -144,15 +142,13 @@ barcodeRouter.post('/barcode', authController.hasToken, async (ctx) => {
 })
 
 // Update a barcode by value
-barcodeRouter.put('/barcode', async (ctx) => {
+barcodeRouter.put('/barcode', authController.hasToken, async (ctx) => {
   try {
     const { value } = ctx.query
 
-    const barcode = await Barcode.findOneAndUpdate(
-      { value },
-      ctx.request.body,
-      { new: true },
-    )
+    const barcode = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
+      new: true,
+    })
 
     if (!barcode) {
       ctx.status = statusCodes.NotFound.code
@@ -170,12 +166,12 @@ barcodeRouter.put('/barcode', async (ctx) => {
 })
 
 // Delete a barcode by value
-barcodeRouter.delete('/barcode', async (ctx) => {
+barcodeRouter.delete('/barcode', authController.hasToken, async (ctx) => {
   try {
     const { value } = ctx.query
-    const barcode = await Barcode.findOneAndRemove({ value })
+    const result = await Barcode.findOneAndDelete({ value })
 
-    if (!barcode) {
+    if (!result) {
       ctx.status = statusCodes.NotFound.code
       ctx.body = statusCodes.NotFound.messages.barcodeNotFound
       return
