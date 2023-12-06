@@ -1,18 +1,5 @@
 const Barcode = require('../models/barcode')
-const BarcodeStatus = require('../models/barcodeStatus')
-
-// // Inserting barcode status dictionary values
-// const Other = new BarcodeStatus({ name: 'Other', value: 0 })
-// const InStock = new BarcodeStatus({ name: 'In Stock', value: 1 })
-// const InTransit = new BarcodeStatus({ name: 'In Transit', value: 2 })
-// const Scrapped = new BarcodeStatus({ name: 'Scrapped', value: 3 })
-// const Lost = new BarcodeStatus({ name: 'Lost', value: 4 })
-
-// Other.save()
-// InStock.save()
-// InTransit.save()
-// Scrapped.save()
-// Lost.save()
+const Dictionary = require('../models/dictionary')
 
 // // 生成条码
 // async function generateBarcode(categoryCode) {
@@ -81,3 +68,36 @@ const BarcodeStatus = require('../models/barcodeStatus')
 //   //   console.error('Error creating and inserting barcode:', error.message)
 //   // }
 // })
+
+// // Inserting barcode status dictionary values
+// const Default = new Dictionary({
+//   key: 'barcode_status',
+//   value: 0,
+//   name: '默认',
+// })
+// const InStock = new Dictionary({
+//   key: 'barcode_status',
+//   value: 1,
+//   name: '在库',
+// })
+// const InTransit = new Dictionary({
+//   key: 'barcode_status',
+//   value: 2,
+//   name: '在途',
+// })
+// const Scrapped = new Dictionary({
+//   key: 'barcode_status',
+//   value: 3,
+//   name: '已报废',
+// })
+// const Lost = new Dictionary({
+//   key: 'barcode_status',
+//   value: 4,
+//   name: '已报失',
+// })
+
+// Default.save()
+// InStock.save()
+// InTransit.save()
+// Scrapped.save()
+// Lost.save()
