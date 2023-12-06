@@ -1,5 +1,4 @@
 const Barcode = require('../models/barcode')
-const authController = require('../controllers/authController')
 const { statusCodes } = require('../statusCodes')
 
 // 生成条码

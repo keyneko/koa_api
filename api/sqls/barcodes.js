@@ -1,7 +1,7 @@
 const Barcode = require('../models/barcode')
 const { generateBarcode } = require('../controllers/barcodeController')
 
-// Inserting barcodes dictionaries
+// Inserting barcodes
 async function insertBarcodes() {
   try {
     const data = [
