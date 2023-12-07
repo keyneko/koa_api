@@ -1,5 +1,5 @@
-const { insertBarcodeStatus } = require('./dictionaries')
+const { insertDictionaries } = require('./dictionaries')
 const { insertBarcodes } = require('./barcodes')
 
-// insertBarcodeStatus()
+insertDictionaries()
 // insertBarcodes()

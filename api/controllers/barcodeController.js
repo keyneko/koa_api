@@ -145,7 +145,7 @@ async function createBarcode(ctx) {
 
 async function updateBarcode(ctx) {
   try {
-    const { value } = ctx.query
+    const { value } = ctx.request.body
 
     const barcode = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
       new: true,

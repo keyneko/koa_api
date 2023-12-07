@@ -11,9 +11,9 @@ async function insertBarcodeStatus() {
       { key: 'barcode_status', value: 4, name: '已报失' },
     ]
 
-    const promises = data.map(async (item) => {
+    const promises = data.map((item) => {
       const dictionary = new Dictionary(item)
-      await dictionary.save()
+      return dictionary.save()
     })
 
     await Promise.all(promises)
@@ -24,4 +24,8 @@ async function insertBarcodeStatus() {
   }
 }
 
-module.exports = { insertBarcodeStatus }
+function insertDictionaries() {
+  insertBarcodeStatus()
+}
+
+module.exports = { insertDictionaries }
