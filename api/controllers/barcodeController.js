@@ -56,9 +56,9 @@ async function getBarcodes(ctx) {
   try {
     const { pageNum = 1, pageSize = 10, status } = ctx.query
 
-    const filter = {};
+    const filter = {}
     if (status != 0) {
-      filter.status = status;
+      filter.status = status
     }
 
     const skip = (pageNum - 1) * pageSize
@@ -66,7 +66,7 @@ async function getBarcodes(ctx) {
 
     const [barcodes, total] = await Promise.all([
       Barcode.find(filter)
-        .select(['value', 'name', 'quantity', 'basicUnit', 'status'])
+        .select(['value', 'name', 'quantity', 'basicUnit', 'status', 'files'])
         .skip(skip)
         .limit(limit),
       Barcode.countDocuments(filter),
@@ -92,6 +92,7 @@ async function getBarcode(ctx) {
       'quantity',
       'basicUnit',
       'status',
+      'files',
     ])
 
     if (!barcode) {
@@ -117,6 +118,7 @@ async function createBarcode(ctx) {
       quantity = 1,
       basicUnit = 'pcs',
       status = 1,
+      files,
     } = ctx.request.body
     const value = await generateBarcode(category)
 
@@ -126,19 +128,14 @@ async function createBarcode(ctx) {
       quantity,
       basicUnit,
       status,
+      files,
     })
 
     const savedBarcode = await newBarcode.save()
 
     ctx.body = {
       code: 200,
-      data: {
-        value: savedBarcode.value,
-        name: savedBarcode.name,
-        quantity: savedBarcode.quantity,
-        basicUnit: savedBarcode.basicUnit,
-        status: savedBarcode.status,
-      },
+      data: value,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError.code
