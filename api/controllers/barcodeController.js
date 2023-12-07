@@ -54,17 +54,22 @@ async function generateBarcode(categoryCode) {
 
 async function getBarcodes(ctx) {
   try {
-    const { pageNum = 1, pageSize = 10 } = ctx.query
+    const { pageNum = 1, pageSize = 10, status } = ctx.query
+
+    const filter = {};
+    if (status != 0) {
+      filter.status = status;
+    }
 
     const skip = (pageNum - 1) * pageSize
     const limit = parseInt(pageSize)
 
     const [barcodes, total] = await Promise.all([
-      Barcode.find()
+      Barcode.find(filter)
         .select(['value', 'name', 'quantity', 'basicUnit', 'status'])
         .skip(skip)
         .limit(limit),
-      Barcode.countDocuments(),
+      Barcode.countDocuments(filter),
     ])
 
     ctx.status = 200
