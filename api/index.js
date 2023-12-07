@@ -2,6 +2,7 @@ const path = require('path')
 const Koa = require('koa')
 const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
+const compress = require('koa-compress')
 const mongoose = require('mongoose')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
@@ -21,6 +22,8 @@ mongoose.connect(MONGODB_URI, {
 
 // 静态文件服务
 app.use(koaStatic(path.join(process.cwd(), '/public')))
+
+app.use(compress())
 
 // Middleware
 app.use(
