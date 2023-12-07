@@ -1,5 +1,9 @@
-const { insertDictionaries } = require('./dictionaries')
+const { insertUsers } = require('./users')
 const { insertBarcodes } = require('./barcodes')
+const { insertPositions } = require('./positions')
+const { insertDictionaries } = require('./dictionaries')
 
-insertDictionaries()
+// insertUsers()
 // insertBarcodes()
+// insertPositions()
+// insertDictionaries()
