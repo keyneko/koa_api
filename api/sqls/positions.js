@@ -1,5 +1,5 @@
 const Position = require('../models/position')
-const { generatePositionCode } = require('../controllers/positionController')
+const { generatePosition } = require('../controllers/positionController')
 
 // Inserting positions
 async function insertPositions() {
@@ -13,13 +13,13 @@ async function insertPositions() {
     ]
 
     for (const item of data) {
-      const value = await generatePositionCode(
+      const value = await generatePosition(
         item.areaCode,
         item.buildingCode,
         item.floorCode,
       )
       const position = new Position({
-        position: value,
+        value,
         name: item.name,
         isStackable: 1,
         status: 1,

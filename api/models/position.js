@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 // Define the schema for the 'positions' collection
 const positionSchema = new mongoose.Schema({
   // Unique position code with specified format
-  position: {
+  value: {
     type: String,
     unique: true,
     required: true,

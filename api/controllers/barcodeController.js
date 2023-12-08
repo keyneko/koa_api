@@ -42,7 +42,9 @@ async function generateBarcode(categoryCode) {
 
   // Calculate the next incremental number
   const nextIncrementalNumber =
-    (lastBarcode.length > 0 ? parseInt(lastBarcode[0].value.slice(-4), 10) : 0) + 1
+    (lastBarcode.length > 0
+      ? parseInt(lastBarcode[0].value.slice(-4), 10)
+      : 0) + 1
 
   // Combine components to form the complete barcode value
   const barcodeValue = `${category}${dateCode}${nextIncrementalNumber
@@ -57,7 +59,7 @@ async function getBarcodes(ctx) {
     const { pageNum = 1, pageSize = 10, status } = ctx.query
 
     const filter = {}
-    if (status != 0) {
+    if (status != undefined) {
       filter.status = status
     }
 
@@ -86,7 +88,7 @@ async function getBarcodes(ctx) {
 
 async function getBarcode(ctx) {
   try {
-    const barcode = await Barcode.findOne({ value: ctx.query.value }).select([
+    const result = await Barcode.findOne({ value: ctx.query.value }).select([
       'value',
       'name',
       'quantity',
@@ -95,14 +97,14 @@ async function getBarcode(ctx) {
       'files',
     ])
 
-    if (!barcode) {
+    if (!result) {
       ctx.status = statusCodes.NotFound.code
       ctx.body = statusCodes.NotFound.messages.barcodeNotFound
       return
     }
     ctx.body = {
       code: 200,
-      data: barcode,
+      data: result,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError.code
@@ -116,12 +118,12 @@ async function createBarcode(ctx) {
       category,
       name,
       quantity = 1,
-      basicUnit = 'pcs',
-      status = 1,
+      basicUnit,
+      status,
       files,
     } = ctx.request.body
-    const value = await generateBarcode(category)
 
+    const value = await generateBarcode(category)
     const newBarcode = new Barcode({
       value,
       name,
@@ -131,7 +133,7 @@ async function createBarcode(ctx) {
       files,
     })
 
-    const savedBarcode = await newBarcode.save()
+    await newBarcode.save()
 
     ctx.body = {
       code: 200,
@@ -147,11 +149,11 @@ async function updateBarcode(ctx) {
   try {
     const { value } = ctx.request.body
 
-    const barcode = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
+    const result = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
       new: true,
     })
 
-    if (!barcode) {
+    if (!result) {
       ctx.status = statusCodes.NotFound.code
       ctx.body = statusCodes.NotFound.messages.barcodeNotFound
       return
