@@ -59,7 +59,7 @@ async function getBarcodes(ctx) {
     const { pageNum = 1, pageSize = 10, status } = ctx.query
 
     const filter = {}
-    if (status != undefined) {
+    if (status !== undefined && status !== '') {
       filter.status = status
     }
 

@@ -57,10 +57,10 @@ async function getPositions(ctx) {
     const { pageNum = 1, pageSize = 10, status, isStackable } = ctx.query
 
     const filter = {}
-    if (status != undefined) {
+    if (status !== undefined && status !== '') {
       filter.status = status
     }
-    if (isStackable != undefined) {
+    if (isStackable !== undefined && isStackable !== '') {
       filter.isStackable = isStackable
     }
 
