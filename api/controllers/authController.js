@@ -3,7 +3,11 @@ const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
 const TokenBlacklist = require('../models/tokenBlacklist')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 const secretKey = 'your-secret-key'
 
@@ -58,16 +62,26 @@ function verifyToken(token) {
 // Middleware to check if the request has a valid token
 const hasToken = async (ctx, next) => {
   const token = ctx.headers.authorization
+  const language = ctx.cookies.get('language')
+
   if (!token) {
-    ctx.status = statusCodes.Unauthorized.code
-    ctx.body = statusCodes.Unauthorized.messages.missingToken
+    ctx.status = statusCodes.Unauthorized
+    ctx.body = getErrorMessage(
+      statusCodes.Unauthorized,
+      language,
+      'missingToken',
+    )
     return
   }
 
   const decoded = await verifyToken(token)
   if (!decoded) {
-    ctx.status = statusCodes.Unauthorized.code
-    ctx.body = statusCodes.Unauthorized.messages.invalidToken
+    ctx.status = statusCodes.Unauthorized
+    ctx.body = getErrorMessage(
+      statusCodes.Unauthorized,
+      language,
+      'invalidToken',
+    )
     return
   }
 
@@ -80,11 +94,12 @@ const hasToken = async (ctx, next) => {
 // Middleware to check if the user is an admin
 const isAdmin = async (ctx, next) => {
   const token = ctx.headers.authorization
+  const language = ctx.cookies.get('language')
   const decoded = await verifyToken(token)
 
   if (!decoded || decoded.username !== 'admin') {
-    ctx.status = statusCodes.Forbidden.code
-    ctx.body = statusCodes.Forbidden.messages.adminOnly
+    ctx.status = statusCodes.Forbidden
+    ctx.body = getErrorMessage(statusCodes.Forbidden, language, 'adminOnly')
     return
   }
 
@@ -96,7 +111,7 @@ const isAdmin = async (ctx, next) => {
 
 function captcha(ctx) {
   const captcha = svgCaptcha.create({
-    ignoreChars: '0o1ilLft',
+    ignoreChars: '0oOQ1iIlft',
     color: true,
     noise: 2,
   })
@@ -119,12 +134,13 @@ function captcha(ctx) {
 
 async function register(ctx) {
   const { username, password, captcha, captchaId } = ctx.request.body
+  const language = ctx.cookies.get('language')
 
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = statusCodes.InvalidCaptcha.code
-    ctx.body = statusCodes.InvalidCaptcha.messages.default
+    ctx.status = statusCodes.InvalidCaptcha
+    ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
     return
   }
   // 清除验证码
@@ -134,8 +150,8 @@ async function register(ctx) {
     // Check if the username already exists
     const existingUser = await User.findOne({ username })
     if (existingUser) {
-      ctx.status = statusCodes.UserExists.code
-      ctx.body = statusCodes.UserExists.messages.default
+      ctx.status = statusCodes.UserExists
+      ctx.body = getErrorMessage(statusCodes.UserExists, language)
       return
     }
 
@@ -159,19 +175,20 @@ async function register(ctx) {
       token,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
-    ctx.body = statusCodes.InternalServerError.messages.default
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
   }
 }
 
 async function login(ctx) {
   const { username, password, captcha, captchaId } = ctx.request.body
+  const language = ctx.cookies.get('language')
 
   // 验证验证码是否匹配
   const storedCaptcha = captchaStore[captchaId]
   if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = statusCodes.InvalidCaptcha.code
-    ctx.body = statusCodes.InvalidCaptcha.messages.default
+    ctx.status = statusCodes.InvalidCaptcha
+    ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
     return
   }
   // 清除验证码
@@ -192,29 +209,34 @@ async function login(ctx) {
           token,
         }
       } else {
-        ctx.status = statusCodes.PasswordError.code
-        ctx.body = statusCodes.PasswordError.messages.default
+        ctx.status = statusCodes.PasswordError
+        ctx.body = getErrorMessage(statusCodes.PasswordError, language)
       }
     } else {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.userNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
-    ctx.body = statusCodes.InternalServerError.messages.default
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
   }
 }
 
 async function logout(ctx) {
   const token = ctx.headers.authorization
+  const language = ctx.cookies.get('language')
 
   try {
     // Check if the token is already in the blacklist
     const isTokenBlacklisted = await TokenBlacklist.findOne({ token })
 
     if (isTokenBlacklisted) {
-      ctx.status = statusCodes.Unauthorized.code
-      ctx.body = statusCodes.Unauthorized.messages.invalidToken
+      ctx.status = statusCodes.Unauthorized
+      ctx.body = getErrorMessage(
+        statusCodes.Unauthorized,
+        language,
+        'invalidToken',
+      )
       return
     }
 
@@ -227,8 +249,8 @@ async function logout(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
-    ctx.body = statusCodes.InternalServerError.messages.default
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
   }
 }
 

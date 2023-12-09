@@ -4,7 +4,11 @@ const Router = require('koa-router')
 const fileRouter = new Router()
 const File = require('../models/file')
 const authController = require('../controllers/authController')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 const projectRoot = process.cwd()
 
@@ -12,10 +16,15 @@ const projectRoot = process.cwd()
 fileRouter.post('/upload', authController.hasToken, async (ctx) => {
   try {
     const { file } = ctx.request.files
+    const language = ctx.cookies.get('language')
 
     if (!file) {
-      ctx.status = statusCodes.InvalidParameters.code
-      ctx.body = statusCodes.InvalidParameters.messages.noFileProvided
+      ctx.status = statusCodes.InvalidParameters
+      ctx.body = getErrorMessage(
+        statusCodes.InvalidParameters,
+        language,
+        'noFileProvided',
+      )
       return
     }
 
@@ -50,8 +59,8 @@ fileRouter.post('/upload', authController.hasToken, async (ctx) => {
       data: `${ctx.origin}/${relativePath}`,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
-    ctx.body = statusCodes.InternalServerError.messages.default
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
   }
 })
 

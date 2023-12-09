@@ -1,12 +1,14 @@
 const Dictionary = require('../models/dictionary')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 async function getDictionaries(ctx) {
   try {
     const { key } = ctx.query
-
-    // Assume you have access to the user's language from cookies
-    const language = ctx.cookies.get('language') || 'zh'
+    const language = ctx.cookies.get('language')
 
     // Query the dictionaries based on the key
     const dictionaries = await Dictionary.find({ key }).select([
@@ -27,7 +29,7 @@ async function getDictionaries(ctx) {
       data: mappedDictionaries,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -35,7 +37,6 @@ async function getDictionaries(ctx) {
 async function createDictionaries(ctx) {
   try {
     const { key, names } = ctx.request.body
-    // Assume you have access to the user's language from cookies
     const language = ctx.cookies.get('language')
 
     // Use map to create an array of promises
@@ -82,7 +83,7 @@ async function createDictionaries(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -90,11 +91,17 @@ async function createDictionaries(ctx) {
 async function deleteDictionaries(ctx) {
   try {
     const key = ctx.query.key
+    const language = ctx.cookies.get('language')
+
     const result = await Dictionary.deleteMany({ key })
 
     if (result.deletedCount === 0) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.dictionariesNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'dictionariesNotFound',
+      )
       return
     }
 
@@ -103,7 +110,7 @@ async function deleteDictionaries(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }

@@ -1,5 +1,9 @@
 const Position = require('../models/position')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 // Function to generate a position code
 async function generatePosition(areaCode, buildingCode, floorCode) {
@@ -28,7 +32,7 @@ async function generatePosition(areaCode, buildingCode, floorCode) {
       },
     ])
 
-    console.log('Aggregation Result:', lastPosition)
+    // console.log('Aggregation Result:', lastPosition)
 
     // Extract the last incremental number or set it to 0 if no previous positions exist
     const lastIncrementalNumber =
@@ -55,6 +59,7 @@ async function generatePosition(areaCode, buildingCode, floorCode) {
 async function getPositions(ctx) {
   try {
     const { pageNum = 1, pageSize = 10, status, isStackable } = ctx.query
+    const language = ctx.cookies.get('language')
 
     const filter = {}
     if (status !== undefined && status !== '') {
@@ -82,7 +87,7 @@ async function getPositions(ctx) {
       total,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -90,6 +95,7 @@ async function getPositions(ctx) {
 async function getPosition(ctx) {
   try {
     const { value } = ctx.query
+    const language = ctx.cookies.get('language')
 
     const result = await Position.findOne({ value }).select([
       'value',
@@ -100,8 +106,12 @@ async function getPosition(ctx) {
     ])
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.positionNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'positionNotFound',
+      )
       return
     }
     ctx.body = {
@@ -109,7 +119,7 @@ async function getPosition(ctx) {
       data: result,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -125,6 +135,8 @@ async function createPosition(ctx) {
       isStackable,
       files,
     } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
     const value = await generatePosition(areaCode, buildingCode, floorCode)
 
     const newPosition = new Position({
@@ -141,7 +153,7 @@ async function createPosition(ctx) {
       data: value,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -149,6 +161,7 @@ async function createPosition(ctx) {
 async function updatePosition(ctx) {
   try {
     const { value } = ctx.request.body
+    const language = ctx.cookies.get('language')
 
     const result = await Position.findOneAndUpdate(
       { value },
@@ -159,8 +172,12 @@ async function updatePosition(ctx) {
     )
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.positionNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'positionNotFound',
+      )
       return
     }
 
@@ -168,7 +185,7 @@ async function updatePosition(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -179,8 +196,12 @@ async function deletePosition(ctx) {
     const result = await Position.findOneAndDelete({ value })
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.positionNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'positionNotFound',
+      )
       return
     }
 
@@ -188,7 +209,7 @@ async function deletePosition(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }

@@ -1,11 +1,22 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
 const authController = require('../controllers/authController')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 async function getUsers(ctx) {
   try {
-    const users = await User.find().select(['username', 'name', 'avatar', 'roles'])
+    const language = ctx.cookies.get('language')
+
+    const users = await User.find().select([
+      'username',
+      'name',
+      'avatar',
+      'roles',
+    ])
 
     // Add the 'token' field to each user object
     const usersWithToken = users.map((user) => {
@@ -21,7 +32,7 @@ async function getUsers(ctx) {
       data: usersWithToken,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -29,6 +40,8 @@ async function getUsers(ctx) {
 async function getUser(ctx) {
   try {
     const userId = ctx.state.decoded.userId
+    const language = ctx.cookies.get('language')
+
     const user = await User.findById(userId).select([
       'username',
       'name',
@@ -37,8 +50,8 @@ async function getUser(ctx) {
     ])
 
     if (!user) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.userNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
       return
     }
 
@@ -48,7 +61,7 @@ async function getUser(ctx) {
       data: user,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -57,11 +70,13 @@ async function updateUser(ctx) {
   try {
     const userId = ctx.state.decoded.userId
     const { name, password, newPassword, avatar } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
     const user = await User.findById(userId)
 
     if (!user) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.userNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
       return
     }
 
@@ -73,8 +88,12 @@ async function updateUser(ctx) {
           user.password = hashedPassword
         }
       } else {
-        ctx.status = statusCodes.PasswordError.code
-        ctx.body = statusCodes.PasswordError.messages.invalidOriginalPassword
+        ctx.status = statusCodes.PasswordError
+        ctx.body = getErrorMessage(
+          statusCodes.PasswordError,
+          language,
+          'invalidOriginalPassword',
+        )
         return
       }
     }
@@ -89,7 +108,7 @@ async function updateUser(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -97,25 +116,30 @@ async function updateUser(ctx) {
 async function deleteUser(ctx) {
   try {
     const userId = ctx.query.id
+    const language = ctx.cookies.get('language')
 
     // Check if the user being deleted is an admin
     const userToDelete = await User.findById(userId)
     if (!userToDelete) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.userNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
       return
     }
 
     if (userToDelete.username === 'admin') {
-      ctx.status = statusCodes.Forbidden.code
-      ctx.body = statusCodes.Forbidden.messages.cannotDeleteAdmin
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'cannotDeleteAdmin',
+      )
       return
     }
 
     const result = await User.findByIdAndDelete(userId)
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.userNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
       return
     }
 
@@ -124,7 +148,7 @@ async function deleteUser(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }

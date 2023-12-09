@@ -1,5 +1,9 @@
 const Barcode = require('../models/barcode')
-const { statusCodes } = require('../statusCodes')
+const {
+  getErrorMessage,
+  statusCodes,
+  statusMessages,
+} = require('../statusCodes')
 
 // 生成条码
 async function generateBarcode(categoryCode) {
@@ -16,8 +20,8 @@ async function generateBarcode(categoryCode) {
     .toString()
     .padStart(2, '0')}${currentDate.getDate().toString().padStart(2, '0')}`
 
-  console.log('Generated Category:', category)
-  console.log('Generated Date Code:', dateCode)
+  // console.log('Generated Category:', category)
+  // console.log('Generated Date Code:', dateCode)
 
   // Use the aggregation pipeline to find the last generated barcode for the specified category and date code
   const lastBarcode = await Barcode.aggregate([
@@ -38,7 +42,7 @@ async function generateBarcode(categoryCode) {
     },
   ])
 
-  console.log('Aggregation Result:', lastBarcode)
+  // console.log('Aggregation Result:', lastBarcode)
 
   // Calculate the next incremental number
   const nextIncrementalNumber =
@@ -57,6 +61,7 @@ async function generateBarcode(categoryCode) {
 async function getBarcodes(ctx) {
   try {
     const { pageNum = 1, pageSize = 10, status } = ctx.query
+    const language = ctx.cookies.get('language')
 
     const filter = {}
     if (status !== undefined && status !== '') {
@@ -81,13 +86,14 @@ async function getBarcodes(ctx) {
       total,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
 
 async function getBarcode(ctx) {
   try {
+    const language = ctx.cookies.get('language')
     const result = await Barcode.findOne({ value: ctx.query.value }).select([
       'value',
       'name',
@@ -98,8 +104,12 @@ async function getBarcode(ctx) {
     ])
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.barcodeNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'barcodeNotFound',
+      )
       return
     }
     ctx.body = {
@@ -107,7 +117,7 @@ async function getBarcode(ctx) {
       data: result,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -122,6 +132,7 @@ async function createBarcode(ctx) {
       status,
       files,
     } = ctx.request.body
+    const language = ctx.cookies.get('language')
 
     const value = await generateBarcode(category)
     const newBarcode = new Barcode({
@@ -140,7 +151,7 @@ async function createBarcode(ctx) {
       data: value,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -148,14 +159,19 @@ async function createBarcode(ctx) {
 async function updateBarcode(ctx) {
   try {
     const { value } = ctx.request.body
+    const language = ctx.cookies.get('language')
 
     const result = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
       new: true,
     })
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.barcodeNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'barcodeNotFound',
+      )
       return
     }
 
@@ -163,7 +179,7 @@ async function updateBarcode(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
@@ -171,11 +187,17 @@ async function updateBarcode(ctx) {
 async function deleteBarcode(ctx) {
   try {
     const { value } = ctx.query
+    const language = ctx.cookies.get('language')
+
     const result = await Barcode.findOneAndDelete({ value })
 
     if (!result) {
-      ctx.status = statusCodes.NotFound.code
-      ctx.body = statusCodes.NotFound.messages.barcodeNotFound
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'barcodeNotFound',
+      )
       return
     }
 
@@ -183,7 +205,7 @@ async function deleteBarcode(ctx) {
       code: 200,
     }
   } catch (error) {
-    ctx.status = statusCodes.InternalServerError.code
+    ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
   }
 }
