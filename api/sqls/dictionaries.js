@@ -110,9 +110,47 @@ async function insertPositionStatus() {
   }
 }
 
+// Inserting position stackable dictionaries
+async function insertPositionStackable() {
+  try {
+    const data = [
+      {
+        key: 'position_stackable',
+        value: 0,
+        name: '不可堆叠',
+        translations: {
+          en: 'Not stackable',
+          ja: 'スタッキング不可',
+        },
+      },
+      {
+        key: 'position_stackable',
+        value: 1,
+        name: '可堆叠',
+        translations: {
+          en: 'Stackable',
+          ja: 'スタッキング可能',
+        },
+      },
+    ]
+
+    const promises = data.map((item) => {
+      const dictionary = new Dictionary(item)
+      return dictionary.save()
+    })
+
+    await Promise.all(promises)
+
+    console.log('Position stackable dictionaries inserted successfully.')
+  } catch (error) {
+    console.error('Error inserting position stackable dictionaries.')
+  }
+}
+
 function insertDictionaries() {
   insertBarcodeStatus()
   insertPositionStatus()
+  insertPositionStackable()
 }
 
 module.exports = { insertDictionaries }

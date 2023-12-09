@@ -11,23 +11,23 @@ const {
 
 const secretKey = 'your-secret-key'
 
-// 存储验证码文本和对应的验证码ID的对象
+// Store captcha code and corresponding captcha code ID
 const captchaStore = {}
 
-// 定时清理过期验证码
+// Regularly clear expired captcha codes
 async function cleanupExpiredCaptcha() {
   const now = Date.now()
   for (const [captchaId, { text, timestamp }] of Object.entries(captchaStore)) {
     if (now - timestamp > 5 * 60 * 1000) {
       console.log(`captcha expired: ${text}`)
-      // 超过5分钟的验证码将被清理
+      // Captcha codes older than 5 minutes will be cleared
       delete captchaStore[captchaId]
     }
   }
 }
-setInterval(cleanupExpiredCaptcha, 60 * 1000) // 每分钟检查一次
+setInterval(cleanupExpiredCaptcha, 60 * 1000) // Check every minute
 
-// 定期清理Token黑名单
+// Regularly clear the Token blacklist
 async function cleanupTokenBlacklist() {
   const expirationThreshold = new Date()
   expirationThreshold.setDate(expirationThreshold.getDate() - 7)
@@ -57,6 +57,18 @@ function verifyToken(token) {
   } catch (error) {
     return null
   }
+}
+
+// Verify whether the captcha code matches
+function validateCaptcha(captcha, captchaId) {
+  const storedCaptcha = captchaStore[captchaId]
+  let isValid = true
+  if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
+    isValid = false
+  }
+  // Clear verification code
+  delete captchaStore[captchaId]
+  return isValid
 }
 
 // Middleware to check if the request has a valid token
@@ -133,20 +145,17 @@ function captcha(ctx) {
 }
 
 async function register(ctx) {
-  const { username, password, captcha, captchaId } = ctx.request.body
-  const language = ctx.cookies.get('language')
-
-  // 验证验证码是否匹配
-  const storedCaptcha = captchaStore[captchaId]
-  if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = statusCodes.InvalidCaptcha
-    ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
-    return
-  }
-  // 清除验证码
-  delete captchaStore[captchaId]
-
   try {
+    const { username, password, captcha, captchaId } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
+    // Verify whether the captcha code is correct
+    if (!validateCaptcha(captcha, captchaId)) {
+      ctx.status = statusCodes.InvalidCaptcha
+      ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
+      return
+    }
+
     // Check if the username already exists
     const existingUser = await User.findOne({ username })
     if (existingUser) {
@@ -167,12 +176,9 @@ async function register(ctx) {
     // Save the user to the database
     await newUser.save()
 
-    const token = generateToken(newUser) // Generate JWT
-
     ctx.status = 200
     ctx.body = {
       code: 200,
-      token,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -181,20 +187,17 @@ async function register(ctx) {
 }
 
 async function login(ctx) {
-  const { username, password, captcha, captchaId } = ctx.request.body
-  const language = ctx.cookies.get('language')
-
-  // 验证验证码是否匹配
-  const storedCaptcha = captchaStore[captchaId]
-  if (!storedCaptcha || storedCaptcha.text !== captcha.toLowerCase()) {
-    ctx.status = statusCodes.InvalidCaptcha
-    ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
-    return
-  }
-  // 清除验证码
-  delete captchaStore[captchaId]
-
   try {
+    const { username, password, captcha, captchaId } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
+    // Verify whether the captcha code is correct
+    if (!validateCaptcha(captcha, captchaId)) {
+      ctx.status = statusCodes.InvalidCaptcha
+      ctx.body = getErrorMessage(statusCodes.InvalidCaptcha, language)
+      return
+    }
+
     // Find the user in the database
     const user = await User.findOne({ username })
 

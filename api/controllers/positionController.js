@@ -75,6 +75,7 @@ async function getPositions(ctx) {
     const [positions, total] = await Promise.all([
       Position.find(filter)
         .select(['value', 'name', 'status', 'isStackable', 'files'])
+        .sort({ _id: -1 })
         .skip(skip)
         .limit(limit),
       Position.countDocuments(filter),

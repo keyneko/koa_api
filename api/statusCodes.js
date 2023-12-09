@@ -7,6 +7,7 @@ function getErrorMessage(errorCode, language, messageKey = 'default') {
   return translations?.[messageKey] || errorCategory.messages[messageKey]
 }
 
+// Enum status codes
 const statusCodes = {
   Unauthorized: 401,
   Forbidden: 403,
@@ -18,6 +19,7 @@ const statusCodes = {
   InvalidParameters: 504,
 }
 
+// Status code messages
 const statusMessages = {
   [statusCodes.Unauthorized]: {
     messages: {

@@ -5,7 +5,7 @@ const {
   statusMessages,
 } = require('../statusCodes')
 
-// 生成条码
+// Generate barcode
 async function generateBarcode(categoryCode) {
   const category = categoryCode.toUpperCase()
 
@@ -74,6 +74,7 @@ async function getBarcodes(ctx) {
     const [barcodes, total] = await Promise.all([
       Barcode.find(filter)
         .select(['value', 'name', 'quantity', 'basicUnit', 'status', 'files'])
+        .sort({ _id: -1 })
         .skip(skip)
         .limit(limit),
       Barcode.countDocuments(filter),

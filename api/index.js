@@ -21,7 +21,7 @@ mongoose.connect(MONGODB_URI, {
   useUnifiedTopology: true,
 })
 
-// 静态文件服务
+// Configuring static file service
 app.use(koaStatic(path.join(process.cwd(), '/public')))
 
 app.use(compress())
@@ -31,15 +31,15 @@ app.use(
   koaBody({
     multipart: true,
     formidable: {
-      // 是否保留拓展名
+      // Whether to keep the extension
       keepExtensions: true,
-      // 限制文件大小
+      // Limit upload file size
       maxFieldsSize: 5 * 1024 * 1024,
     },
   }),
 )
 
-// Routes
+// Set routes
 app.use(authRoutes.routes())
 app.use(userRoutes.routes())
 app.use(fileRoutes.routes())
