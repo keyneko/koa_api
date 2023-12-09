@@ -11,7 +11,10 @@ const dictionarySchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
+  },
+  translations: {
+    type: Map, // Map type for storing translations
+    of: String, // String values for translations
   },
 })
 

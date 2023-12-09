@@ -4,12 +4,52 @@ const Dictionary = require('../models/dictionary')
 async function insertBarcodeStatus() {
   try {
     const data = [
-      { key: 'barcode_status', value: 0, name: '默认' },
-      { key: 'barcode_status', value: 1, name: '在库' },
-      { key: 'barcode_status', value: 2, name: '在途' },
-      { key: 'barcode_status', value: 3, name: '已报废' },
-      { key: 'barcode_status', value: 4, name: '已报失' },
-    ]
+      {
+        key: 'barcode_status',
+        value: 0,
+        name: '默认',
+        translations: {
+          en: 'Default',
+          ja: 'デフォルト',
+        },
+      },
+      {
+        key: 'barcode_status',
+        value: 1,
+        name: '在库',
+        translations: {
+          en: 'In stock',
+          ja: '在庫あり',
+        },
+      },
+      {
+        key: 'barcode_status',
+        value: 2,
+        name: '在途',
+        translations: {
+          en: 'In transit',
+          ja: '途中で',
+        },
+      },
+      {
+        key: 'barcode_status',
+        value: 3,
+        name: '已报废',
+        translations: {
+          en: 'Scrapped',
+          ja: '廃棄された',
+        },
+      },
+      {
+        key: 'barcode_status',
+        value: 4,
+        name: '已报失',
+        translations: {
+          en: 'Lost',
+          ja: '失った',
+        },
+      },
+    ];
 
     const promises = data.map((item) => {
       const dictionary = new Dictionary(item)
@@ -28,9 +68,33 @@ async function insertBarcodeStatus() {
 async function insertPositionStatus() {
   try {
     const data = [
-      { key: 'position_status', value: 0, name: '默认' },
-      { key: 'position_status', value: 1, name: '有效' },
-      { key: 'position_status', value: 2, name: '失效' },
+      {
+        key: 'position_status',
+        value: 0,
+        name: '默认',
+        translations: {
+          en: 'Default',
+          ja: 'デフォルト',
+        },
+      },
+      {
+        key: 'position_status',
+        value: 1,
+        name: '有效',
+        translations: {
+          en: 'Valid',
+          ja: '有効',
+        },
+      },
+      {
+        key: 'position_status',
+        value: 2,
+        name: '失效',
+        translations: {
+          en: 'Invalid',
+          ja: '無効',
+        },
+      },
     ]
 
     const promises = data.map((item) => {
