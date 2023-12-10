@@ -8,7 +8,6 @@ const barcodeSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
   },
   quantity: {
     type: Number,
@@ -16,7 +15,6 @@ const barcodeSchema = new mongoose.Schema({
   },
   basicUnit: {
     type: String,
-    default: 'pcs',
   },
   options: {
     type: Object,
@@ -32,6 +30,10 @@ const barcodeSchema = new mongoose.Schema({
   files: {
     type: [String],
     default: [],
+  },
+  translations: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 })
 

@@ -73,17 +73,37 @@ async function getBarcodes(ctx) {
 
     const [barcodes, total] = await Promise.all([
       Barcode.find(filter)
-        .select(['value', 'name', 'quantity', 'basicUnit', 'status', 'files'])
+        .select([
+          'value',
+          'name',
+          'quantity',
+          'basicUnit',
+          'status',
+          'files',
+          'translations',
+        ])
         .sort({ _id: -1 })
         .skip(skip)
         .limit(limit),
       Barcode.countDocuments(filter),
     ])
 
+    // Map over the barcodes to retrieve translated values
+    const mappedBarcodes = barcodes.map((barcode) => ({
+      _id: barcode._id,
+      value: barcode.value,
+      name: barcode.translations?.name?.[language] || barcode.name,
+      quantity: barcode.quantity,
+      basicUnit:
+        barcode.translations?.basicUnit?.[language] || barcode.basicUnit,
+      status: barcode.status,
+      files: barcode.files,
+    }))
+
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: barcodes,
+      data: mappedBarcodes,
       total,
     }
   } catch (error) {
@@ -94,14 +114,17 @@ async function getBarcodes(ctx) {
 
 async function getBarcode(ctx) {
   try {
+    const { value } = ctx.query
     const language = ctx.cookies.get('language')
-    const result = await Barcode.findOne({ value: ctx.query.value }).select([
+
+    const result = await Barcode.findOne({ value }).select([
       'value',
       'name',
       'quantity',
       'basicUnit',
       'status',
       'files',
+      'translations',
     ])
 
     if (!result) {
@@ -113,9 +136,19 @@ async function getBarcode(ctx) {
       )
       return
     }
+
     ctx.body = {
       code: 200,
-      data: result,
+      data: {
+        _id: result._id,
+        value: result.value,
+        name: result.translations?.name?.[language] || result.name,
+        quantity: result.quantity,
+        basicUnit:
+          result.translations?.basicUnit?.[language] || result.basicUnit,
+        status: result.status,
+        files: result.files,
+      },
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -138,12 +171,26 @@ async function createBarcode(ctx) {
     const value = await generateBarcode(category)
     const newBarcode = new Barcode({
       value,
-      name,
       quantity,
-      basicUnit,
       status,
       files,
     })
+
+    // Handle translations based on the language value
+    if (language === 'zh' || language === undefined) {
+      newBarcode.name = name
+      newBarcode.basicUnit = basicUnit
+    } else {
+      // Use $set to add translations
+      newBarcode.$set('translations', {
+        name: {
+          [language]: name,
+        },
+        basicUnit: {
+          [language]: basicUnit,
+        },
+      })
+    }
 
     await newBarcode.save()
 
@@ -160,13 +207,12 @@ async function createBarcode(ctx) {
 async function updateBarcode(ctx) {
   try {
     const { value } = ctx.request.body
+    const updateData = { ...ctx.request.body }
     const language = ctx.cookies.get('language')
 
-    const result = await Barcode.findOneAndUpdate({ value }, ctx.request.body, {
-      new: true,
-    })
+    const barcode = await Barcode.findOne({ value })
 
-    if (!result) {
+    if (!barcode) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -175,6 +221,36 @@ async function updateBarcode(ctx) {
       )
       return
     }
+
+    // Update default fields for 'zh' or undefined language
+    if (language === 'zh' || language === undefined) {
+      barcode.name = updateData.name || barcode.name
+      barcode.basicUnit = updateData.basicUnit || barcode.basicUnit
+    } else {
+      // Update translations based on the specified language
+      if ('name' in updateData) {
+        barcode.translations.name = {
+          ...(barcode.translations.name || {}),
+          [language]: updateData.name,
+        }
+      }
+
+      if ('basicUnit' in updateData) {
+        barcode.translations.basicUnit = {
+          ...(barcode.translations.basicUnit || {}),
+          [language]: updateData.basicUnit,
+        }
+      }
+    }
+
+    // Mark the modified fields to ensure they are saved
+    barcode.markModified('translations');
+
+    barcode.quantity = updateData.quantity || barcode.quantity
+    barcode.status = updateData.status || barcode.status
+    barcode.files = updateData.files || barcode.files
+
+    await barcode.save()
 
     ctx.body = {
       code: 200,
