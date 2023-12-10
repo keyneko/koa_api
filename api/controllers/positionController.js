@@ -74,17 +74,34 @@ async function getPositions(ctx) {
 
     const [positions, total] = await Promise.all([
       Position.find(filter)
-        .select(['value', 'name', 'status', 'isStackable', 'files'])
+        .select([
+          'value',
+          'name',
+          'status',
+          'isStackable',
+          'files',
+          'translations',
+        ])
         .sort({ _id: -1 })
         .skip(skip)
         .limit(limit),
       Position.countDocuments(filter),
     ])
 
+    // Map over the positions to retrieve translated values
+    const mappedPositions = positions.map((position) => ({
+      _id: position._id,
+      value: position.value,
+      name: position.translations?.name?.[language] || position.name,
+      status: position.status,
+      isStackable: position.isStackable,
+      files: position.files,
+    }))
+
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: positions,
+      data: mappedPositions,
       total,
     }
   } catch (error) {
@@ -104,6 +121,7 @@ async function getPosition(ctx) {
       'status',
       'isStackable',
       'files',
+      'translations',
     ])
 
     if (!result) {
@@ -117,7 +135,14 @@ async function getPosition(ctx) {
     }
     ctx.body = {
       code: 200,
-      data: result,
+      data: {
+        _id: result._id,
+        value: result.value,
+        name: result.translations?.name?.[language] || result.name,
+        isStackable: result.isStackable,
+        status: result.status,
+        files: result.files,
+      },
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -142,11 +167,23 @@ async function createPosition(ctx) {
 
     const newPosition = new Position({
       value,
-      name,
       status,
       isStackable,
       files,
     })
+
+    // Handle translations based on the language value
+    if (language === 'zh' || language === undefined) {
+      newPosition.name = name
+    } else {
+      // Use $set to add translations
+      newPosition.$set('translations', {
+        name: {
+          [language]: name,
+        },
+      })
+    }
+
     await newPosition.save()
 
     ctx.body = {
@@ -162,17 +199,12 @@ async function createPosition(ctx) {
 async function updatePosition(ctx) {
   try {
     const { value } = ctx.request.body
+    const updateData = { ...ctx.request.body }
     const language = ctx.cookies.get('language')
 
-    const result = await Position.findOneAndUpdate(
-      { value },
-      ctx.request.body,
-      {
-        new: true,
-      },
-    )
+    const position = await Position.findOne({ value })
 
-    if (!result) {
+    if (!position) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -181,6 +213,30 @@ async function updatePosition(ctx) {
       )
       return
     }
+
+    // Update default fields for 'zh' or undefined language
+    if (language === 'zh' || language === undefined) {
+      position.name = updateData.name || position.name
+    } else {
+      // Update translations based on the specified language
+      if ('name' in updateData) {
+        position.translations.name = {
+          ...(position.translations.name || {}),
+          [language]: updateData.name,
+        }
+      }
+    }
+
+    // Mark the modified fields to ensure they are saved
+    position.markModified('translations')
+
+    if (updateData.status !== undefined)
+      position.status = updateData.status
+    if (updateData.isStackable !== undefined)
+      position.isStackable = updateData.isStackable
+    position.files = updateData.files || position.files
+
+    await position.save()
 
     ctx.body = {
       code: 200,

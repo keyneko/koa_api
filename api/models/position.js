@@ -11,7 +11,6 @@ const positionSchema = new mongoose.Schema({
   // Name of the position
   name: {
     type: String,
-    required: true,
   },
   // Status of the position: 0 (default), 1 (valid), 2 (invalid)
   status: {
@@ -32,6 +31,10 @@ const positionSchema = new mongoose.Schema({
   files: {
     type: [String],
     default: [],
+  },
+  translations: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 })
 
