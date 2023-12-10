@@ -23,7 +23,6 @@ async function insertPositions() {
         name: item.name,
         isStackable: 1,
         status: 1,
-        options: { 尺寸: '20cmx20cmx60cm' },
       })
       await position.save()
     }
