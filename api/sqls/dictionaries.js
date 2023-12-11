@@ -49,7 +49,7 @@ async function insertBarcodeStatus() {
           ja: '失った',
         },
       },
-    ];
+    ]
 
     const promises = data.map((item) => {
       const dictionary = new Dictionary(item)
@@ -61,52 +61,6 @@ async function insertBarcodeStatus() {
     console.log('Barcode status dictionaries inserted successfully.')
   } catch (error) {
     console.error('Error inserting barcode status dictionaries.')
-  }
-}
-
-// Inserting position status dictionaries
-async function insertPositionStatus() {
-  try {
-    const data = [
-      {
-        key: 'position_status',
-        value: 0,
-        name: '默认',
-        translations: {
-          en: 'Default',
-          ja: 'デフォルト',
-        },
-      },
-      {
-        key: 'position_status',
-        value: 1,
-        name: '有效',
-        translations: {
-          en: 'Valid',
-          ja: '有効',
-        },
-      },
-      {
-        key: 'position_status',
-        value: 2,
-        name: '失效',
-        translations: {
-          en: 'Invalid',
-          ja: '無効',
-        },
-      },
-    ]
-
-    const promises = data.map((item) => {
-      const dictionary = new Dictionary(item)
-      return dictionary.save()
-    })
-
-    await Promise.all(promises)
-
-    console.log('Position status dictionaries inserted successfully.')
-  } catch (error) {
-    console.error('Error inserting position status dictionaries.')
   }
 }
 
@@ -147,9 +101,46 @@ async function insertPositionStackable() {
   }
 }
 
+// Inserting status dictionaries
+async function insertStatus() {
+  try {
+    const data = [
+      {
+        key: 'status',
+        value: 0,
+        name: '无效',
+        translations: {
+          en: 'Invalid',
+          ja: '無効',
+        },
+      },
+      {
+        key: 'status',
+        value: 1,
+        name: '有效',
+        translations: {
+          en: 'Valid',
+          ja: '有効',
+        },
+      },
+    ]
+
+    const promises = data.map((item) => {
+      const dictionary = new Dictionary(item)
+      return dictionary.save()
+    })
+
+    await Promise.all(promises)
+
+    console.log('Status dictionaries inserted successfully.')
+  } catch (error) {
+    console.error('Error inserting status dictionaries.')
+  }
+}
+
 function insertDictionaries() {
+  insertStatus()
   insertBarcodeStatus()
-  insertPositionStatus()
   insertPositionStackable()
 }
 

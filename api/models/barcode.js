@@ -11,10 +11,11 @@ const barcodeSchema = new mongoose.Schema({
   },
   quantity: {
     type: Number,
-    default: 0,
+    default: 1,
   },
   basicUnit: {
     type: String,
+    default: 'pcs',
   },
   options: {
     type: Object,
@@ -23,9 +24,11 @@ const barcodeSchema = new mongoose.Schema({
   position: {
     type: String,
   },
+  // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,
-    default: 0,
+    enum: [0, 1],
+    default: 1,
   },
   files: {
     type: [String],

@@ -5,11 +5,54 @@ const { generatePosition } = require('../controllers/positionController')
 async function insertPositions() {
   try {
     const data = [
-      { name: '金牛座10号楼2层货架', areaCode: 1, buildingCode: 10, floorCode: 2 },
-      { name: '金牛座10号楼2层货架', areaCode: 1, buildingCode: 10, floorCode: 2 },
-      { name: '金牛座10号楼2层货架', areaCode: 1, buildingCode: 10, floorCode: 2 },
-      { name: '金牛座9号楼负1层货架', areaCode: 1, buildingCode: 9, floorCode: 'f1' },
-      { name: '金牛座9号楼1层货架', areaCode: 1, buildingCode: 9, floorCode: 1 },
+      {
+        areaCode: 1,
+        buildingCode: 10,
+        floorCode: 2,
+        name: '金牛座10号楼2层货架',
+        translations: {
+          name: {
+            en: 'Shelves on the 2nd floor of Taurus Building 10',
+            ja: 'トーラス10号館2階棚',
+          },
+        },
+      },
+      {
+        areaCode: 1,
+        buildingCode: 10,
+        floorCode: 2,
+        name: '金牛座10号楼2层货架',
+        translations: {
+          name: {
+            en: 'Shelves on the 2nd floor of Taurus Building 10',
+            ja: 'トーラス10号館2階棚',
+          },
+        },
+      },
+      {
+        areaCode: 1,
+        buildingCode: 9,
+        floorCode: 'F1',
+        name: '金牛座9号楼地下1层货架',
+        translations: {
+          name: {
+            en: 'Shelves on the basement floor of Building 9, Taurus',
+            ja: 'タウラス9号館地下1階棚',
+          },
+        },
+      },
+      {
+        areaCode: 1,
+        buildingCode: 9,
+        floorCode: 1,
+        name: '金牛座9号楼1层货架',
+        translations: {
+          name: {
+            en: 'Shelves on the 1st floor of Taurus Building 9',
+            ja: 'トーラス9号館1階棚',
+          },
+        },
+      },
     ]
 
     for (const item of data) {
@@ -19,17 +62,15 @@ async function insertPositions() {
         item.floorCode,
       )
       const position = new Position({
+        ...item,
         value,
-        name: item.name,
-        isStackable: 1,
-        status: 1,
       })
       await position.save()
     }
 
     console.log('Positions inserted successfully.')
   } catch (error) {
-    console.error('Error inserting Positions.', error)
+    console.error('Error inserting Positions.')
   }
 }
 

@@ -16,15 +16,17 @@ async function getUsers(ctx) {
       'name',
       'avatar',
       'roles',
+      'translations',
     ])
 
     // Add the 'token' field to each user object
-    const usersWithToken = users.map((user) => {
-      return {
-        ...user.toObject(),
-        token: authController.generateToken(user),
-      }
-    })
+    const usersWithToken = users.map((user) => ({
+      username: user.username,
+      name: user.translations?.get(language) || user.name,
+      avatar: user.avatar,
+      roles: user.roles,
+      token: authController.generateToken(user),
+    }))
 
     ctx.status = 200
     ctx.body = {
@@ -47,6 +49,7 @@ async function getUser(ctx) {
       'name',
       'avatar',
       'roles',
+      'translations',
     ])
 
     if (!user) {
@@ -55,10 +58,14 @@ async function getUser(ctx) {
       return
     }
 
-    ctx.status = 200
     ctx.body = {
       code: 200,
-      data: user,
+      data: {
+        username: user.username,
+        name: user.translations?.get(language) || user.name,
+        avatar: user.avatar,
+        roles: user.roles,
+      },
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -98,7 +105,20 @@ async function updateUser(ctx) {
       }
     }
 
-    user.name = name || user.name
+    // Update default fields for 'zh' or undefined language
+    if (language === 'zh' || language === undefined) {
+      user.name = name || user.name
+    } else {
+      // Update translations based on the specified language
+      if (name) {
+        user.translations = user.translations || new Map()
+        user.translations.set(language, name)
+      }
+
+      // Mark the modified fields to ensure they are saved
+      user.markModified('translations')
+    }
+
     user.avatar = avatar || user.avatar
 
     await user.save()

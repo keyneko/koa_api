@@ -1,9 +1,11 @@
 const { insertUsers } = require('./users')
+const { insertRoles } = require('./roles')
 const { insertBarcodes } = require('./barcodes')
 const { insertPositions } = require('./positions')
 const { insertDictionaries } = require('./dictionaries')
 
-// insertUsers()
+insertRoles()
+insertUsers()
 // insertBarcodes()
 // insertPositions()
 insertDictionaries()

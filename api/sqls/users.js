@@ -5,8 +5,26 @@ const User = require('../models/user')
 async function insertUsers() {
   try {
     const data = [
-      { username: 'admin', password: '123456', name: '管理员', roles: [] },
-      { username: 'keyneko', password: '123456', name: '平民', roles: [] },
+      {
+        username: 'admin',
+        password: '123456',
+        name: '超级管理员',
+        roles: [],
+        translations: {
+          en: 'Super Admin',
+          ja: 'スーパー管理者',
+        },
+      },
+      {
+        username: 'keyneko',
+        password: '123456',
+        name: '流水线操作工',
+        roles: [],
+        translations: {
+          en: 'Brick Carrier',
+          ja: 'ボトムポーター',
+        },
+      },
     ]
 
     const promises = data.map(async (item) => {
@@ -15,10 +33,8 @@ async function insertUsers() {
 
       // Create a new user
       const user = new User({
-        username: item.username,
+        ...item,
         password: hashedPassword,
-        name: item.name,
-        roles: item.roles,
       })
       return user.save()
     })
@@ -27,7 +43,7 @@ async function insertUsers() {
 
     console.log('Users inserted successfully.')
   } catch (error) {
-    console.error('Error inserting users.', error)
+    console.error('Error inserting users.')
   }
 }
 

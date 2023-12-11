@@ -1,24 +1,13 @@
 const mongoose = require('mongoose')
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
+const roleSchema = new mongoose.Schema({
+  value: {
+    type: Number,
     unique: true,
-    required: true,
-  },
-  password: {
-    type: String,
     required: true,
   },
   name: {
     type: String,
-  },
-  avatar: {
-    type: String,
-  },
-  roles: {
-    type: [String],
-    default: [],
   },
   // Status: 0 (invalid), 1 (valid)
   status: {
@@ -26,12 +15,16 @@ const userSchema = new mongoose.Schema({
     enum: [0, 1],
     default: 1,
   },
+  sops: {
+    type: [String],
+    default: [],
+  },
   translations: {
     type: Map, // Map type for storing translations
     of: String, // String values for translations
   },
 })
 
-const User = mongoose.model('User', userSchema)
+const Role = mongoose.model('Role', roleSchema)
 
-module.exports = User
+module.exports = Role
