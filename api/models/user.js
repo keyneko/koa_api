@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   roles: {
-    type: [String],
+    type: [Number],
     default: [],
   },
   // Status: 0 (invalid), 1 (valid)

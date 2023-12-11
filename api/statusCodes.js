@@ -44,8 +44,8 @@ const statusMessages = {
   [statusCodes.Forbidden]: {
     messages: {
       default: '禁止操作',
-      missingToken: '禁止操作：仅限管理员',
-      invalidToken: '禁止操作：无法删除管理员帐户',
+      adminOnly: '禁止操作：仅限管理员',
+      cannotDeleteAdmin: '禁止操作：无法删除管理员帐户',
     },
     translations: {
       en: {
@@ -55,8 +55,8 @@ const statusMessages = {
       },
       ja: {
         default: '禁止操作',
-        missingToken: '禁止操作：管理者限定',
-        invalidToken: '禁止操作: 管理者アカウントは削除できません',
+        adminOnly: '禁止操作：管理者限定',
+        cannotDeleteAdmin: '禁止操作: 管理者アカウントは削除できません',
       },
     },
   },
@@ -65,6 +65,7 @@ const statusMessages = {
     messages: {
       default: '未找到',
       userNotFound: '未找到用户',
+      roleNotFound: '未找到角色',
       barcodeNotFound: '未找到条形码',
       positionNotFound: '未找到库位码',
       dictionariesNotFound: '未找到字典',
@@ -73,6 +74,7 @@ const statusMessages = {
       en: {
         default: 'Not Found',
         userNotFound: 'User Not Found',
+        roleNotFound: 'Role Not Found',
         barcodeNotFound: 'Barcode Not Found',
         positionNotFound: 'Position Not Found',
         dictionariesNotFound: 'Dictionaries Not Found',
@@ -80,6 +82,7 @@ const statusMessages = {
       ja: {
         default: '見つからない',
         userNotFound: 'ユーザーが見つからない',
+        roleNotFound: 'ロールが見つからない',
         barcodeNotFound: 'バーコードが見つからない',
         positionNotFound: 'ポジションが見つからない',
         dictionariesNotFound: '辞書が見つからない',

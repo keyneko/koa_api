@@ -16,7 +16,7 @@ const roleSchema = new mongoose.Schema({
     default: 1,
   },
   sops: {
-    type: [String],
+    type: [Number],
     default: [],
   },
   translations: {

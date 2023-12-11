@@ -16,15 +16,18 @@ async function getUsers(ctx) {
       'name',
       'avatar',
       'roles',
+      'status',
       'translations',
     ])
 
     // Add the 'token' field to each user object
     const usersWithToken = users.map((user) => ({
+      _id: user._id,
       username: user.username,
       name: user.translations?.get(language) || user.name,
       avatar: user.avatar,
       roles: user.roles,
+      status: user.status,
       token: authController.generateToken(user),
     }))
 
@@ -76,10 +79,17 @@ async function getUser(ctx) {
 async function updateUser(ctx) {
   try {
     const userId = ctx.state.decoded.userId
-    const { name, password, newPassword, avatar } = ctx.request.body
+    const { username, name, password, newPassword, avatar, roles, status } =
+      ctx.request.body
     const language = ctx.cookies.get('language')
 
-    const user = await User.findById(userId)
+    let user
+
+    if (username) {
+      user = await User.findOne({ username })
+    } else {
+      user = await User.findById(userId)
+    }
 
     if (!user) {
       ctx.status = statusCodes.NotFound
@@ -120,6 +130,8 @@ async function updateUser(ctx) {
     }
 
     user.avatar = avatar || user.avatar
+    user.roles = roles
+    user.status = status
 
     await user.save()
 
