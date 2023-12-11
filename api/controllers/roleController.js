@@ -62,6 +62,7 @@ async function createRole(ctx) {
 
     ctx.body = {
       code: 200,
+      data: value,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError

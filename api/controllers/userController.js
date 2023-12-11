@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const Role = require('../models/role')
 const User = require('../models/user')
 const authController = require('../controllers/authController')
 const {
@@ -61,6 +62,18 @@ async function getUser(ctx) {
       return
     }
 
+    // Calculate unique sops by aggregating roles' sops
+    const allSops = []
+    for (const value of user.roles) {
+      const role = await Role.findOne({ value }).select('sops')
+      if (role) {
+        allSops.push(...role.sops)
+      }
+    }
+
+    // Deduplicate sops list
+    const uniqueSops = Array.from(new Set(allSops))
+
     ctx.body = {
       code: 200,
       data: {
@@ -68,6 +81,7 @@ async function getUser(ctx) {
         name: user.translations?.get(language) || user.name,
         avatar: user.avatar,
         roles: user.roles,
+        sops: uniqueSops,
       },
     }
   } catch (error) {
