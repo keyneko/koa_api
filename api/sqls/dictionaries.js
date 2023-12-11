@@ -138,7 +138,81 @@ async function insertStatus() {
   }
 }
 
+// Inserting sop dictionaries
+async function insertSops() {
+  try {
+    const data = [
+      {
+        key: 'sops',
+        value: 0,
+        name: '角色管理',
+        translations: {
+          en: 'Roles Management',
+          ja: 'ロール管理',
+        },
+      },
+      {
+        key: 'sops',
+        value: 1,
+        name: '用户管理',
+        translations: {
+          en: 'Users Management',
+          ja: 'ユーザー管理',
+        },
+      },
+      {
+        key: 'sops',
+        value: 2,
+        name: '条码生成',
+        translations: {
+          en: 'Barcode Generate',
+          ja: 'バーコード生成',
+        },
+      },
+      {
+        key: 'sops',
+        value: 3,
+        name: '条码管理',
+        translations: {
+          en: 'Barcode Management',
+          ja: 'バーコード管理',
+        },
+      },
+      {
+        key: 'sops',
+        value: 4,
+        name: '库位码生成',
+        translations: {
+          en: 'Position Generate',
+          ja: 'ポジションコード生成',
+        },
+      },
+      {
+        key: 'sops',
+        value: 5,
+        name: '库位码管理',
+        translations: {
+          en: 'Position Management',
+          ja: 'ポジションコード管理',
+        },
+      },
+    ]
+
+    const promises = data.map((item) => {
+      const dictionary = new Dictionary(item)
+      return dictionary.save()
+    })
+
+    await Promise.all(promises)
+
+    console.log('Sops dictionaries inserted successfully.')
+  } catch (error) {
+    console.error('Error inserting sops dictionaries.')
+  }
+}
+
 function insertDictionaries() {
+  insertSops()
   insertStatus()
   insertBarcodeStatus()
   insertPositionStackable()

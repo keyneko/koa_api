@@ -10,13 +10,9 @@ async function getRoles(ctx) {
   try {
     const language = ctx.cookies.get('language')
 
-    const roles = await Role.find().select([
-      'value',
-      'name',
-      'sops',
-      'status',
-      'translations',
-    ])
+    const roles = await Role.find()
+      .select(['value', 'name', 'sops', 'status', 'translations'])
+      .sort({ _id: -1 })
 
     const mappedRoles = roles.map((role) => ({
       _id: role._id,
@@ -39,8 +35,14 @@ async function getRoles(ctx) {
 
 async function createRole(ctx) {
   try {
-    const { value, name, sops, status } = ctx.request.body
+    const { name, sops, status } = ctx.request.body
     const language = ctx.cookies.get('language')
+
+    // Query the database to find the maximum value among existing roles
+    const maxRole = await Role.findOne().sort('-value')
+
+    // Determine the new role's value by incrementing the maximum value
+    const value = maxRole ? maxRole.value + 1 : 1
 
     const newRole = new Role({
       value,
@@ -94,8 +96,8 @@ async function updateRole(ctx) {
       role.markModified('translations')
     }
 
-    role.status = status || role.status
-    role.sops = sops || role.sops
+    role.status = status
+    role.sops = sops
 
     await role.save()
 
