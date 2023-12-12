@@ -3,8 +3,8 @@
 // Function to get the translated error message based on the user's language or use a specified default message
 function getErrorMessage(errorCode, language, messageKey = 'default') {
   const errorCategory = statusMessages[errorCode]
-  const translations = errorCategory.translations?.[language]
-  return translations?.[messageKey] || errorCategory.messages[messageKey]
+  const messages = errorCategory.translations?.[language]
+  return messages?.[messageKey] || errorCategory.messages[messageKey]
 }
 
 // Enum status codes
@@ -45,18 +45,18 @@ const statusMessages = {
     messages: {
       default: '禁止操作',
       adminOnly: '禁止操作：仅限管理员',
-      cannotDeleteAdmin: '禁止操作：无法删除管理员帐户',
+      cannotDeleteAdmin: '禁止操作：无法删除管理员角色',
     },
     translations: {
       en: {
         default: 'Permission denied',
         adminOnly: 'Forbidden Operation (Admin Only)',
-        cannotDeleteAdmin: 'Forbidden: Cannot delete admin accounts',
+        cannotDeleteAdmin: 'Forbidden: Cannot delete admin role',
       },
       ja: {
         default: '禁止操作',
         adminOnly: '禁止操作：管理者限定',
-        cannotDeleteAdmin: '禁止操作: 管理者アカウントは削除できません',
+        cannotDeleteAdmin: '禁止操作: 管理者ロールを削除できません',
       },
     },
   },

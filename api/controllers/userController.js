@@ -144,8 +144,8 @@ async function updateUser(ctx) {
     }
 
     user.avatar = avatar || user.avatar
-    user.roles = roles
-    user.status = status
+    user.status = status || user.status
+    if (roles !== undefined) user.roles = roles
 
     await user.save()
 
@@ -164,15 +164,15 @@ async function deleteUser(ctx) {
     const userId = ctx.query.id
     const language = ctx.cookies.get('language')
 
-    // Check if the user being deleted is an admin
-    const userToDelete = await User.findById(userId)
-    if (!userToDelete) {
+    const user = await User.findById(userId)
+    if (!user) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
       return
     }
 
-    if (userToDelete.username === 'admin') {
+    // Check if the user being deleted has admin role
+    if (user.roles.includes(0 /* Administrator */)) {
       ctx.status = statusCodes.Forbidden
       ctx.body = getErrorMessage(
         statusCodes.Forbidden,

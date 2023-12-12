@@ -26,11 +26,12 @@ async function cleanupExpiredCaptcha() {
   }
 }
 setInterval(cleanupExpiredCaptcha, 60 * 1000) // Check every minute
+cleanupExpiredCaptcha()
 
 // Regularly clear the Token blacklist
 async function cleanupTokenBlacklist() {
   const expirationThreshold = new Date()
-  expirationThreshold.setDate(expirationThreshold.getDate() - 7)
+  expirationThreshold.setDate(expirationThreshold.getDate() - 3)
 
   try {
     // Remove entries older than the expiration threshold
@@ -39,7 +40,8 @@ async function cleanupTokenBlacklist() {
     console.error('Token blacklist cleanup error:', error)
   }
 }
-setInterval(cleanupTokenBlacklist, 24 * 60 * 60 * 1000) // 24 hours
+setInterval(cleanupTokenBlacklist, 24 * 60 * 60 * 1000) // Check every 24 hours
+cleanupTokenBlacklist()
 
 function generateToken(user) {
   const payload = {
@@ -49,7 +51,7 @@ function generateToken(user) {
   }
 
   // Sign the JWT token
-  return jwt.sign(payload, secretKey, { expiresIn: '24h' }) // Adjust the expiration time as needed
+  return jwt.sign(payload, secretKey, { expiresIn: '72h' }) // Adjust the expiration time as needed
 }
 
 function verifyToken(token) {
@@ -137,7 +139,7 @@ function captcha(ctx) {
   console.log(`captcha generated: ${captcha.text} ${captchaId}`)
 
   captchaStore[captchaId] = {
-    text: captcha.text.toLowerCase(), // 存储验证码文本，转为小写以方便后续验证
+    text: captcha.text.toLowerCase(),
     timestamp: Date.now(),
   }
 

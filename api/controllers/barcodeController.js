@@ -267,7 +267,6 @@ async function deleteBarcode(ctx) {
     const language = ctx.cookies.get('language')
 
     const result = await Barcode.findOneAndDelete({ value })
-
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(

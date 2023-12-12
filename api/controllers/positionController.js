@@ -250,8 +250,9 @@ async function updatePosition(ctx) {
 async function deletePosition(ctx) {
   try {
     const { value } = ctx.query
-    const result = await Position.findOneAndDelete({ value })
+    const language = ctx.cookies.get('language')
 
+    const result = await Position.findOneAndDelete({ value })
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(

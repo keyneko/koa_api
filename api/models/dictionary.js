@@ -6,7 +6,7 @@ const dictionarySchema = new mongoose.Schema({
     required: true,
   },
   value: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed, // Accepts Number or String
     required: true,
   },
   name: {

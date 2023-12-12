@@ -8,11 +8,16 @@ const {
 
 async function getRoles(ctx) {
   try {
+    const { sortBy = '_id', sortOrder = 'desc' /* asc */ } = ctx.query
     const language = ctx.cookies.get('language')
+
+    const sortOptions = {
+      [sortBy]: sortOrder === 'desc' ? -1 : 1,
+    }
 
     const roles = await Role.find()
       .select(['value', 'name', 'sops', 'status', 'translations'])
-      .sort({ _id: -1 })
+      .sort(sortOptions)
 
     const mappedRoles = roles.map((role) => ({
       _id: role._id,
@@ -76,7 +81,6 @@ async function updateRole(ctx) {
     const language = ctx.cookies.get('language')
 
     const role = await Role.findOne({ value })
-
     if (!role) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'roleNotFound')
@@ -115,8 +119,20 @@ async function updateRole(ctx) {
 async function deleteRole(ctx) {
   try {
     const { value } = ctx.query
-    const result = await Role.findOneAndDelete({ value })
+    const language = ctx.cookies.get('language')
 
+    // Check if the role being deleted is admin
+    if (value == 0 /* Administrator */) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'cannotDeleteAdmin',
+      )
+      return
+    }
+
+    const result = await Role.findOneAndDelete({ value })
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'roleNotFound')

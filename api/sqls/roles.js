@@ -7,7 +7,7 @@ async function insertRoles() {
       {
         name: '管理员',
         value: 0,
-        sops: [],
+        sops: [0, 1], // Roles、Users Management Sops
         translations: {
           en: 'Administrator',
           ja: '管理者',
