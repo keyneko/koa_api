@@ -1,4 +1,3 @@
-const logger = require('../logger')
 const Router = require('koa-router')
 const logRouter = new Router()
 const authController = require('../controllers/authController')
@@ -7,6 +6,7 @@ const {
   statusCodes,
   statusMessages,
 } = require('../statusCodes')
+const { frontend: logger } = require('../logger')
 
 // Upload file
 logRouter.post('/log', authController.hasToken, async (ctx) => {
@@ -14,8 +14,8 @@ logRouter.post('/log', authController.hasToken, async (ctx) => {
     const { message, stack } = ctx.request.body
 
     // Log the error
-    logger.error('@@From frontend@@ ' + message)
-    logger.error(stack)
+    logger.error(message)
+    if (stack) logger.error(stack)
 
     ctx.body = { code: 200 }
   } catch (error) {

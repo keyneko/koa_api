@@ -18,24 +18,27 @@ const format = winston.format.combine(
 )
 
 // Configure Winston with a transport for daily rotated logs
+const transports = (filename) => [
+  new DailyRotateFile({
+    level: 'info',
+    filename: path.join(logDirectory, moment().format('YYYY-MM'), filename),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true, // Log files older than maxFiles will be compressed into a zip archive
+    handleExceptions: true, // Capturing and logging unexpected errors
+    json: false, // Makes the log entries more human-readable
+    maxSize: '20m',
+    maxFiles: '14d', // Retain logs for 14 days
+  }),
+]
+
 const logger = winston.createLogger({
   format,
-  transports: [
-    new DailyRotateFile({
-      level: 'info',
-      filename: path.join(
-        logDirectory,
-        moment().format('YYYY-MM'),
-        'application-%DATE%.log',
-      ),
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      handleExceptions: true,
-      json: false,
-      maxSize: '20m',
-      maxFiles: '14d', // Retain logs for 14 days
-    }),
-  ],
+  transports: transports('application-%DATE%.log'),
+})
+
+const frontend = winston.createLogger({
+  format,
+  transports: transports('frontend-%DATE%.log'),
 })
 
 // Add a console transport for logging to the console during development
@@ -50,4 +53,4 @@ logger.info('= Welcome to the application!            =')
 logger.info('= ====================================== =')
 
 // Export the configured logger
-module.exports = logger
+module.exports = { logger, frontend }
