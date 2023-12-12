@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "server": "node api/index.js"
+    "start": "cross-env NODE_ENV=development node api/index.js",
+    "start:prod": "cross-env NODE_ENV=production node api/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -20,9 +21,13 @@
     "lodash": "^4.17.21",
     "mongoose": "^7.6.5",
     "svg-captcha": "^1.4.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
     "zlib": "^1.0.5"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
     "prettier": "^3.1.0"
   }
 }

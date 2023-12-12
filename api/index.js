@@ -1,5 +1,6 @@
 const path = require('path')
 const Koa = require('koa')
+const dotenv = require('dotenv')
 const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
 const compress = require('koa-compress')
@@ -12,9 +13,14 @@ const barcodeRoutes = require('./routes/barcodeRoutes')
 const positionRoutes = require('./routes/positionRoutes')
 const dictionaryRoutes = require('./routes/dictionaryRoutes')
 
+// Load environment variables from the appropriate file based on the NODE_ENV
+const envFile =
+  process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
+dotenv.config({ path: envFile })
+
 const app = new Koa()
 const PORT = process.env.PORT || 4000
-const MONGODB_URI = 'mongodb://localhost:27017/test'
+const MONGODB_URI = `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/test`
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {

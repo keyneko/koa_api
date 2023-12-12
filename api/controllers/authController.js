@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
 const TokenBlacklist = require('../models/tokenBlacklist')
+const logger = require('../logger')
 const {
   getErrorMessage,
   statusCodes,
@@ -19,7 +20,7 @@ async function cleanupExpiredCaptcha() {
   const now = Date.now()
   for (const [captchaId, { text, timestamp }] of Object.entries(captchaStore)) {
     if (now - timestamp > 5 * 60 * 1000) {
-      console.log(`captcha expired: ${text}`)
+      logger.info(`captcha expired: ${text}`)
       // Captcha codes older than 5 minutes will be cleared
       delete captchaStore[captchaId]
     }
@@ -37,7 +38,8 @@ async function cleanupTokenBlacklist() {
     // Remove entries older than the expiration threshold
     await TokenBlacklist.deleteMany({ createdAt: { $lt: expirationThreshold } })
   } catch (error) {
-    console.error('Token blacklist cleanup error:', error)
+    logger.error('Token blacklist cleanup error:')
+    logger.error(error)
   }
 }
 setInterval(cleanupTokenBlacklist, 24 * 60 * 60 * 1000) // Check every 24 hours
@@ -136,7 +138,7 @@ function captcha(ctx) {
   })
   const captchaId = Date.now().toString()
 
-  console.log(`captcha generated: ${captcha.text} ${captchaId}`)
+  logger.info(`captcha generated: ${captcha.text} ${captchaId}`)
 
   captchaStore[captchaId] = {
     text: captcha.text.toLowerCase(),
