@@ -45,6 +45,7 @@ function generateToken(user) {
   const payload = {
     userId: user._id,
     username: user.username,
+    roles: user.roles,
   }
 
   // Sign the JWT token
@@ -109,7 +110,11 @@ const isAdmin = async (ctx, next) => {
   const language = ctx.cookies.get('language')
   const decoded = await verifyToken(token)
 
-  if (!decoded || decoded.username !== 'admin') {
+  if (
+    !decoded ||
+    !decoded.roles ||
+    !decoded.roles.includes(0 /* Administrator */)
+  ) {
     ctx.status = statusCodes.Forbidden
     ctx.body = getErrorMessage(statusCodes.Forbidden, language, 'adminOnly')
     return

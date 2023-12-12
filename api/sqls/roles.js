@@ -6,6 +6,7 @@ async function insertRoles() {
     const data = [
       {
         name: '管理员',
+        value: 0,
         sops: [],
         translations: {
           en: 'Administrator',
@@ -14,6 +15,7 @@ async function insertRoles() {
       },
       {
         name: '仓管员',
+        value: 1,
         sops: [],
         translations: {
           en: 'Warehouse Keeper',
@@ -22,6 +24,7 @@ async function insertRoles() {
       },
       {
         name: '质检员',
+        value: 2,
         sops: [],
         translations: {
           en: 'Quality Inspector',
@@ -30,6 +33,7 @@ async function insertRoles() {
       },
       {
         name: '生产员',
+        value: 3,
         sops: [],
         translations: {
           en: 'Production Worker',
@@ -38,6 +42,7 @@ async function insertRoles() {
       },
       {
         name: '巡检员',
+        value: 4,
         sops: [],
         translations: {
           en: 'Patrol Inspector',
@@ -46,11 +51,8 @@ async function insertRoles() {
       },
     ]
 
-    const promises = data.map(async (item, idx) => {
-      const role = new Role({
-        ...item,
-        value: idx,
-      })
+    const promises = data.map((item) => {
+      const role = new Role(item)
       return role.save()
     })
 
