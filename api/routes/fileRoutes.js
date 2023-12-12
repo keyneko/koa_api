@@ -2,7 +2,6 @@ const fs = require('fs')
 const path = require('path')
 const Router = require('koa-router')
 const fileRouter = new Router()
-const File = require('../models/file')
 const authController = require('../controllers/authController')
 const {
   getErrorMessage,

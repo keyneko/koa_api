@@ -5,6 +5,7 @@ const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
 const compress = require('koa-compress')
 const mongoose = require('mongoose')
+const logRoutes = require('./routes/logRoutes')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const roleRoutes = require('./routes/roleRoutes')
@@ -47,6 +48,7 @@ app.use(
 )
 
 // Set routes
+app.use(logRoutes.routes())
 app.use(authRoutes.routes())
 app.use(userRoutes.routes())
 app.use(roleRoutes.routes())
