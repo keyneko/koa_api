@@ -24,11 +24,9 @@ const barcodeSchema = new mongoose.Schema({
   position: {
     type: String,
   },
-  // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,
-    enum: [0, 1],
-    default: 1,
+    default: 0,
   },
   files: {
     type: [String],

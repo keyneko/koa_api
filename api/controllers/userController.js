@@ -11,7 +11,12 @@ const {
 
 async function getUsers(ctx) {
   try {
+    const { sortBy = '_id', sortOrder = 'desc' /* asc */ } = ctx.query
     const language = ctx.cookies.get('language')
+
+    const sortOptions = {
+      [sortBy]: sortOrder === 'desc' ? -1 : 1,
+    }
 
     const users = await User.find().select([
       'username',
@@ -21,6 +26,7 @@ async function getUsers(ctx) {
       'status',
       'translations',
     ])
+    .sort(sortOptions)
 
     // Add the 'token' field to each user object
     const usersWithToken = users.map((user) => ({

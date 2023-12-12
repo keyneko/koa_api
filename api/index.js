@@ -13,6 +13,7 @@ const fileRoutes = require('./routes/fileRoutes')
 const barcodeRoutes = require('./routes/barcodeRoutes')
 const positionRoutes = require('./routes/positionRoutes')
 const dictionaryRoutes = require('./routes/dictionaryRoutes')
+const sensorRoutes = require('./routes/sensorRoutes')
 
 // Load environment variables from the appropriate file based on the NODE_ENV
 const envFile =
@@ -56,6 +57,7 @@ app.use(fileRoutes.routes())
 app.use(barcodeRoutes.routes())
 app.use(positionRoutes.routes())
 app.use(dictionaryRoutes.routes())
+app.use(sensorRoutes.routes())
 
 require('./sqls')
 

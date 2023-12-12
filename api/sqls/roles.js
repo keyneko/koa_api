@@ -6,12 +6,12 @@ async function insertRoles() {
   try {
     const data = [
       {
-        name: '管理员',
+        name: '系统管理员',
         value: 0,
         sops: [0, 1], // Roles、Users Management Sops
         translations: {
           en: 'Administrator',
-          ja: '管理者',
+          ja: 'システム管理者',
         },
       },
       {
@@ -20,7 +20,7 @@ async function insertRoles() {
         sops: [],
         translations: {
           en: 'Warehouse Keeper',
-          ja: '倉庫管理人',
+          ja: '倉庫管理者',
         },
       },
       {
