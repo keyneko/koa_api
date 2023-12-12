@@ -1,4 +1,5 @@
 const Barcode = require('../models/barcode')
+const { logger } = require('../logger')
 const {
   getErrorMessage,
   statusCodes,

@@ -1,4 +1,5 @@
 const Dictionary = require('../models/dictionary')
+const { logger } = require('../logger')
 
 // Inserting barcode status dictionaries
 async function insertBarcodeStatus() {
@@ -58,9 +59,9 @@ async function insertBarcodeStatus() {
 
     await Promise.all(promises)
 
-    console.log('Barcode status dictionaries inserted successfully.')
+    logger.info('Barcode status dictionaries inserted successfully.')
   } catch (error) {
-    console.error('Error inserting barcode status dictionaries.')
+    logger.error('Error inserting barcode status dictionaries.')
   }
 }
 
@@ -95,9 +96,9 @@ async function insertPositionStackable() {
 
     await Promise.all(promises)
 
-    console.log('Position stackable dictionaries inserted successfully.')
+    logger.info('Position stackable dictionaries inserted successfully.')
   } catch (error) {
-    console.error('Error inserting position stackable dictionaries.')
+    logger.error('Error inserting position stackable dictionaries.')
   }
 }
 
@@ -132,9 +133,9 @@ async function insertStatus() {
 
     await Promise.all(promises)
 
-    console.log('Status dictionaries inserted successfully.')
+    logger.info('Status dictionaries inserted successfully.')
   } catch (error) {
-    console.error('Error inserting status dictionaries.')
+    logger.error('Error inserting status dictionaries.')
   }
 }
 
@@ -205,9 +206,9 @@ async function insertSops() {
 
     await Promise.all(promises)
 
-    console.log('Sops dictionaries inserted successfully.')
+    logger.info('Sops dictionaries inserted successfully.')
   } catch (error) {
-    console.error('Error inserting sops dictionaries.')
+    logger.error('Error inserting sops dictionaries.')
   }
 }
 

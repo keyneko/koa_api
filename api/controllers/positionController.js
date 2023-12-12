@@ -1,4 +1,5 @@
 const Position = require('../models/position')
+const { logger } = require('../logger')
 const {
   getErrorMessage,
   statusCodes,

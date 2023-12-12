@@ -1,4 +1,5 @@
 const Dictionary = require('../models/dictionary')
+const { logger } = require('../logger')
 const {
   getErrorMessage,
   statusCodes,

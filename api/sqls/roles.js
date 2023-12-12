@@ -1,4 +1,5 @@
 const Role = require('../models/role')
+const { logger } = require('../logger')
 
 // Inserting roles
 async function insertRoles() {
@@ -58,9 +59,9 @@ async function insertRoles() {
 
     await Promise.all(promises)
 
-    console.log('Roles inserted successfully.')
+    logger.info('Roles inserted successfully.')
   } catch (error) {
-    console.error('Error inserting roles.')
+    logger.error('Error inserting roles.')
   }
 }
 

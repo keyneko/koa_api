@@ -1,5 +1,6 @@
 const Barcode = require('../models/barcode')
 const { generateBarcode } = require('../controllers/barcodeController')
+const { logger } = require('../logger')
 
 // Inserting barcodes
 async function insertBarcodes() {
@@ -106,9 +107,9 @@ async function insertBarcodes() {
       await barcode.save()
     }
 
-    console.log('Barcodes inserted successfully.')
+    logger.info('Barcodes inserted successfully.')
   } catch (error) {
-    console.error('Error inserting barcodes.')
+    logger.error('Error inserting barcodes.')
   }
 }
 

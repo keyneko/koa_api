@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const Role = require('../models/role')
 const User = require('../models/user')
 const authController = require('../controllers/authController')
+const { logger } = require('../logger')
 const {
   getErrorMessage,
   statusCodes,

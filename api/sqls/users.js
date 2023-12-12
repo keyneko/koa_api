@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
+const { logger } = require('../logger')
 
 // Inserting users
 async function insertUsers() {
@@ -41,9 +42,9 @@ async function insertUsers() {
 
     await Promise.all(promises)
 
-    console.log('Users inserted successfully.')
+    logger.info('Users inserted successfully.')
   } catch (error) {
-    console.error('Error inserting users.')
+    logger.error('Error inserting users.')
   }
 }
 

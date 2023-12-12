@@ -1,5 +1,6 @@
 const Position = require('../models/position')
 const { generatePosition } = require('../controllers/positionController')
+const { logger } = require('../logger')
 
 // Inserting positions
 async function insertPositions() {
@@ -68,9 +69,9 @@ async function insertPositions() {
       await position.save()
     }
 
-    console.log('Positions inserted successfully.')
+    logger.info('Positions inserted successfully.')
   } catch (error) {
-    console.error('Error inserting Positions.')
+    logger.error('Error inserting Positions.')
   }
 }
 

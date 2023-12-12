@@ -1,5 +1,6 @@
 const Role = require('../models/role')
 const authController = require('../controllers/authController')
+const { logger } = require('../logger')
 const {
   getErrorMessage,
   statusCodes,
