@@ -69,6 +69,7 @@ const statusMessages = {
       barcodeNotFound: '未找到条形码',
       positionNotFound: '未找到库位码',
       dictionariesNotFound: '未找到字典',
+      sensorNotFound: '未找到传感器',
     },
     translations: {
       en: {
@@ -78,6 +79,7 @@ const statusMessages = {
         barcodeNotFound: 'Barcode Not Found',
         positionNotFound: 'Position Not Found',
         dictionariesNotFound: 'Dictionaries Not Found',
+        sensorNotFound: 'Sensor Not Found',
       },
       ja: {
         default: '見つからない',
@@ -86,6 +88,7 @@ const statusMessages = {
         barcodeNotFound: 'バーコードが見つからない',
         positionNotFound: 'ポジションが見つからない',
         dictionariesNotFound: '辞書が見つからない',
+        sensorNotFound: 'センサーが見つからない',
       },
     },
   },

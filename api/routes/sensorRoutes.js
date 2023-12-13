@@ -3,6 +3,27 @@ const sensorRouter = new Router()
 const authController = require('../controllers/authController')
 const sensorController = require('../controllers/sensorController')
 
+// Get all sensors
+sensorRouter.get(
+  '/sensors',
+  authController.hasToken,
+  sensorController.getSensors,
+)
+
+// Create a sensor
+sensorRouter.post(
+  '/sensor',
+  authController.hasToken,
+  sensorController.createSensor,
+)
+
+// Delete a sensor
+sensorRouter.delete(
+  '/sensor',
+  authController.hasToken,
+  sensorController.deleteSensor,
+)
+
 // Get all records
 sensorRouter.get(
   '/sensor/records',

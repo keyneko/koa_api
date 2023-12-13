@@ -212,11 +212,40 @@ async function insertSops() {
   }
 }
 
+// Inserting sensor types dictionaries
+async function insertSensorTypes() {
+  try {
+    const data = [
+      {
+        key: 'sensor_type',
+        value: 0,
+        name: '温湿度传感器',
+        translations: {
+          en: 'Temperature & Humidity Sensor',
+          ja: '温湿度センサー',
+        },
+      },
+    ]
+
+    const promises = data.map((item) => {
+      const dictionary = new Dictionary(item)
+      return dictionary.save()
+    })
+
+    await Promise.all(promises)
+
+    logger.info('Status dictionaries inserted successfully.')
+  } catch (error) {
+    logger.error('Error inserting status dictionaries.')
+  }
+}
+
 function insertDictionaries() {
   insertSops()
   insertStatus()
   insertBarcodeStatus()
   insertPositionStackable()
+  insertSensorTypes()
 }
 
 module.exports = { insertDictionaries }

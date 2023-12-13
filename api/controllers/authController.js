@@ -4,6 +4,7 @@ const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
 const TokenBlacklist = require('../models/tokenBlacklist')
 const { logger } = require('../logger')
+const { decryptPassword } = require('../utils/rsa')
 const {
   getErrorMessage,
   statusCodes,
@@ -173,8 +174,11 @@ async function register(ctx) {
       return
     }
 
+    // Decrypt the encrypted password
+    const decryptedPassword = decryptPassword(password)
+
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(decryptedPassword, 10)
 
     // Create a new user
     const newUser = new User({
@@ -212,7 +216,10 @@ async function login(ctx) {
 
     // Check if the user exists and verify the password
     if (user) {
-      if (await bcrypt.compare(password, user.password)) {
+      // Decrypt the encrypted password
+      const decryptedPassword = decryptPassword(password)
+
+      if (await bcrypt.compare(decryptedPassword, user.password)) {
         const token = generateToken(user) // Generate JWT
 
         ctx.status = 200
