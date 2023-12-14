@@ -11,26 +11,52 @@ const {
 
 async function getSensors(ctx) {
   try {
-    const { type, manufacturer, status } = ctx.query
+    const { name, type, number, manufacturer, status } = ctx.query
     const language = ctx.cookies.get('language')
 
     const query = {}
+
+    // Fuzzy search for name (case-insensitive)
+    if (name !== undefined && name !== '') {
+      if (language === 'zh' || language === undefined) {
+        query.name = { $regex: new RegExp(name, 'i') }
+      } else {
+        query['translations.name.' + language] = {
+          $regex: new RegExp(name, 'i'),
+        }
+      }
+    }
+
     if (type !== undefined && type !== '') {
       query.type = type
     }
-    if (manufacturer !== undefined && manufacturer !== '') {
-      query.manufacturer = manufacturer
+
+    // Fuzzy search for number (case-insensitive)
+    if (number !== undefined && number !== '') {
+      query.number = { $regex: new RegExp(number, 'i') }
     }
+
+    if (manufacturer !== undefined && manufacturer !== '') {
+      if (language === 'zh' || language === undefined) {
+        query.manufacturer = { $regex: new RegExp(manufacturer, 'i') }
+      } else {
+        query['translations.manufacturer.' + language] = {
+          $regex: new RegExp(manufacturer, 'i'),
+        }
+      }
+    }
+
     if (status !== undefined && status !== '') {
       query.status = status
     }
 
     const sensors = await Sensor.find(query).select([
       'name',
-      'number',
       'type',
+      'number',
       'manufacturer',
       'status',
+      'translations',
     ])
 
     ctx.status = 200
@@ -38,6 +64,10 @@ async function getSensors(ctx) {
       code: 200,
       data: sensors.map((sensor) => ({
         ...sensor.toObject(),
+        name: sensor.translations?.name?.[language] || sensor.name,
+        manufacturer:
+          sensor.translations?.manufacturer?.[language] || sensor.manufacturer,
+        translations: undefined,
       })),
     }
   } catch (error) {
@@ -52,11 +82,25 @@ async function createSensor(ctx) {
     const language = ctx.cookies.get('language')
 
     const newSensor = new Sensor({
-      name,
-      number,
       type,
-      manufacturer,
+      number,
     })
+
+    // Handle translations based on language
+    if (language === 'zh' || language === undefined) {
+      newSensor.name = name
+      newSensor.manufacturer = manufacturer
+    } else {
+      // Use $set to add translations
+      newSensor.$set('translations', {
+        name: {
+          [language]: name,
+        },
+        manufacturer: {
+          [language]: manufacturer,
+        },
+      })
+    }
 
     await newSensor.save()
 
@@ -69,12 +113,13 @@ async function createSensor(ctx) {
   }
 }
 
-async function deleteSensor(ctx) {
+async function updateSensor(ctx) {
   try {
-    const { id } = ctx.query
+    const { _id, name, number, manufacturer, type, status } = ctx.request.body
     const language = ctx.cookies.get('language')
 
-    if (!(await validateSensorId(id))) {
+    const sensor = await Sensor.findById(_id)
+    if (!sensor) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -84,7 +129,62 @@ async function deleteSensor(ctx) {
       return
     }
 
-    const result = await Sensor.findByIdAndDelete(id)
+    // Update default fields for 'zh' or undefined language
+    if (language === 'zh' || language === undefined) {
+      sensor.name = name || sensor.name
+      sensor.manufacturer = manufacturer
+    } else {
+      // Update translations based on the specified language
+      if (name) {
+        sensor.translations.name = {
+          ...(sensor.translations.name || {}),
+          [language]: name,
+        }
+      }
+
+      if (manufacturer !== undefined) {
+        sensor.translations.manufacturer = {
+          ...(sensor.translations.manufacturer || {}),
+          [language]: manufacturer,
+        }
+      }
+
+      // Mark the modified fields to ensure they are saved
+      sensor.markModified('translations')
+    }
+
+    if (type !== undefined) sensor.type = type
+    if (number !== undefined) sensor.number = number
+    if (status !== undefined) sensor.status = status
+
+    await sensor.save()
+
+    ctx.status = 200
+    ctx.body = {
+      code: 200,
+    }
+  } catch (error) {
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
+  }
+}
+
+async function deleteSensor(ctx) {
+  try {
+    const { _id } = ctx.query
+    const language = ctx.cookies.get('language')
+
+    if (!(await validateSensorId(_id))) {
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'sensorNotFound',
+      )
+      return
+    }
+
+    const result = await Sensor.findByIdAndDelete(_id)
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
@@ -209,6 +309,7 @@ async function createRecord(ctx) {
 module.exports = {
   getSensors,
   createSensor,
+  updateSensor,
   deleteSensor,
   getRecords,
   createRecord,

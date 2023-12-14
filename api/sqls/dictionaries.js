@@ -234,9 +234,9 @@ async function insertSensorTypes() {
 
     await Promise.all(promises)
 
-    logger.info('Status dictionaries inserted successfully.')
+    logger.info('Sensor types dictionaries inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting status dictionaries.')
+    logger.error('Error inserting sensor types dictionaries.')
   }
 }
 

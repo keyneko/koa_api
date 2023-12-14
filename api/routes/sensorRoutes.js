@@ -17,6 +17,13 @@ sensorRouter.post(
   sensorController.createSensor,
 )
 
+// Update a sensor
+sensorRouter.put(
+  '/sensor',
+  authController.hasToken,
+  sensorController.updateSensor,
+)
+
 // Delete a sensor
 sensorRouter.delete(
   '/sensor',

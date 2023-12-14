@@ -3,6 +3,7 @@ const Role = require('../models/role')
 const User = require('../models/user')
 const authController = require('../controllers/authController')
 const { logger } = require('../logger')
+const { decryptPassword } = require('../utils/rsa')
 const {
   getErrorMessage,
   statusCodes,
@@ -18,15 +19,9 @@ async function getUsers(ctx) {
       [sortBy]: sortOrder === 'desc' ? -1 : 1,
     }
 
-    const users = await User.find().select([
-      'username',
-      'name',
-      'avatar',
-      'roles',
-      'status',
-      'translations',
-    ])
-    .sort(sortOptions)
+    const users = await User.find()
+      .select(['username', 'name', 'avatar', 'roles', 'status', 'translations'])
+      .sort(sortOptions)
 
     // Add the 'token' field to each user object
     const usersWithToken = users.map((user) => ({
@@ -120,9 +115,15 @@ async function updateUser(ctx) {
 
     // Check if the user exists and verify the password
     if (password) {
-      if (await bcrypt.compare(password, user.password)) {
+      // Decrypt the encrypted password
+      const decryptedPassword = decryptPassword(password)
+
+      if (await bcrypt.compare(decryptedPassword, user.password)) {
         if (newPassword) {
-          const hashedPassword = await bcrypt.hash(newPassword, 10)
+          // Decrypt the encrypted password
+          const decryptedNewPassword = decryptPassword(newPassword)
+
+          const hashedPassword = await bcrypt.hash(decryptedNewPassword, 10)
           user.password = hashedPassword
         }
       } else {
