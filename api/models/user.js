@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
       ref: 'Role',
     },
   ],
+  denyPermissions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Permission',
+    },
+  ],
   // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,

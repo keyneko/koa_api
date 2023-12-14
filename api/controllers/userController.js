@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const Role = require('../models/role')
 const User = require('../models/user')
+const Permission = require('../models/permission')
 const authController = require('../controllers/authController')
 const { logger } = require('../logger')
 const { decryptPassword } = require('../utils/rsa')
@@ -21,15 +22,34 @@ async function getUsers(ctx) {
 
     const users = await User.find()
       .select(['username', 'name', 'avatar', 'roles', 'status', 'translations'])
-      .populate('roles')
+      .populate({
+        path: 'roles',
+        populate: {
+          path: 'permissions',
+        },
+      })
+      .populate('denyPermissions')
       .sort(sortOptions)
 
     // Add the 'token' field to each user object
     const mapped = users.map((d) => ({
       ...d.toObject(),
       name: d.translations?.get(language) || d.name,
-      permissions: [...new Set(d.roles.flatMap((role) => role.permissions))],
       token: authController.generateToken(d),
+      roles: d.roles.map((role) => role.value),
+      sops: [...new Set(d.roles.flatMap((role) => role.sops))],
+      permissions: [
+        ...new Set(
+          d.roles.flatMap((role) =>
+            role.permissions.map((permission) => permission.pattern),
+          ),
+        ),
+      ],
+      denyPermissions: [
+        ...new Set(d.denyPermissions.map((permission) => permission.pattern)),
+      ],
+      password: undefined,
+      translations: undefined,
     }))
 
     ctx.status = 200
@@ -48,15 +68,23 @@ async function getUser(ctx) {
     const userId = ctx.state.decoded.userId
     const language = ctx.cookies.get('language')
 
-    const user = await User.findById(userId).select([
-      'username',
-      'name',
-      'avatar',
-      'roles',
-      'translations',
-    ])
-    // .populate('roles')
-
+    const user = await User.findById(userId)
+      .select([
+        'username',
+        'name',
+        'avatar',
+        'roles',
+        'denyPermissions',
+        'status',
+        'translations',
+      ])
+      .populate({
+        path: 'roles',
+        populate: {
+          path: 'permissions',
+        },
+      })
+      .populate('denyPermissions')
 
     if (!user) {
       ctx.status = statusCodes.NotFound
@@ -64,26 +92,27 @@ async function getUser(ctx) {
       return
     }
 
-    // Calculate unique sops by aggregating roles' sops
-    const allSops = []
-    for (const value of user.roles) {
-      const role = await Role.findOne({ value }).select('sops')
-      if (role) {
-        allSops.push(...role.sops)
-      }
-    }
-
-    // Deduplicate sops list
-    const uniqueSops = Array.from(new Set(allSops))
-
     ctx.body = {
       code: 200,
       data: {
-        username: user.username,
+        ...user.toObject(),
         name: user.translations?.get(language) || user.name,
-        avatar: user.avatar,
-        roles: user.roles,
-        sops: uniqueSops,
+        roles: user.roles.map((role) => role.value),
+        sops: [...new Set(user.roles.flatMap((role) => role.sops))],
+        permissions: [
+          ...new Set(
+            user.roles.flatMap((role) =>
+              role.permissions.map((permission) => permission.pattern),
+            ),
+          ),
+        ],
+        denyPermissions: [
+          ...new Set(
+            user.denyPermissions.map((permission) => permission.pattern),
+          ),
+        ],
+        translations: undefined,
+        _id: undefined,
       },
     }
   } catch (error) {
@@ -95,8 +124,16 @@ async function getUser(ctx) {
 async function updateUser(ctx) {
   try {
     const userId = ctx.state.decoded.userId
-    const { username, name, password, newPassword, avatar, roles, status } =
-      ctx.request.body
+    const {
+      username,
+      name,
+      password,
+      newPassword,
+      avatar,
+      roles,
+      denyPermissions,
+      status,
+    } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     let user
@@ -151,9 +188,23 @@ async function updateUser(ctx) {
       user.markModified('translations')
     }
 
-    user.avatar = avatar || user.avatar
-    user.status = status || user.status
-    if (roles !== undefined) user.roles = roles
+    if (avatar !== undefined) user.avatar = avatar
+    if (status !== undefined) user.status = status
+
+    // Convert value array to _id array for roles
+    if (roles !== undefined) {
+      const roleObjects = await Role.find({ value: { $in: roles } }, '_id')
+      user.roles = roleObjects.map((role) => role._id)
+    }
+
+    // Convert pattern array to _id array for roles
+    if (denyPermissions !== undefined) {
+      const perms = await Permission.find(
+        { pattern: { $in: denyPermissions } },
+        '_id',
+      )
+      user.denyPermissions = perms.map((p) => p._id)
+    }
 
     await user.save()
 
@@ -169,10 +220,14 @@ async function updateUser(ctx) {
 
 async function deleteUser(ctx) {
   try {
-    const userId = ctx.query.id
+    const { _id } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const user = await User.findById(userId)
+    const user = await User.findById(_id).populate({
+      path: 'roles',
+      select: 'isAdmin',
+    })
+
     if (!user) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')
@@ -180,7 +235,7 @@ async function deleteUser(ctx) {
     }
 
     // Check if the user being deleted has admin role
-    if (user.roles.includes(0 /* Administrator */)) {
+    if (user.roles.some((role) => role.isAdmin)) {
       ctx.status = statusCodes.Forbidden
       ctx.body = getErrorMessage(
         statusCodes.Forbidden,
@@ -190,7 +245,7 @@ async function deleteUser(ctx) {
       return
     }
 
-    const result = await User.findByIdAndDelete(userId)
+    const result = await User.findByIdAndDelete(_id)
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'userNotFound')

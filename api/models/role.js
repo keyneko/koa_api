@@ -1,13 +1,19 @@
 const mongoose = require('mongoose')
 
 const roleSchema = new mongoose.Schema({
-  value: {
-    type: Number,
-    // unique: true,
-    required: true,
-  },
   name: {
     type: String,
+  },
+  value: {
+    type: Number,
+    unique: true,
+    required: true,
+  },
+  isProtected: {
+    type: Boolean,
+  },
+  isAdmin: {
+    type: Boolean,
   },
   // Status: 0 (invalid), 1 (valid)
   status: {
@@ -19,10 +25,12 @@ const roleSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.Mixed],
     default: [],
   },
-  permissions: {
-    type: [String],
-    default: [],
-  },
+  permissions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Permission',
+    },
+  ],
   translations: {
     type: Map, // Map type for storing translations
     of: String, // String values for translations

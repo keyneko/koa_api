@@ -1,4 +1,5 @@
 const Role = require('../models/role')
+const Permission = require('../models/permission')
 const authController = require('../controllers/authController')
 const { logger } = require('../logger')
 const {
@@ -25,13 +26,14 @@ async function getRoles(ctx) {
         'permissions',
         'translations',
       ])
+      .populate('permissions')
       .sort(sortOptions)
 
     const mapped = roles.map((d) => ({
       ...d.toObject(),
       name: d.translations?.get(language) || d.name,
+      permissions: d.permissions.map((p) => p.pattern),
       translations: undefined,
-      _id: undefined,
     }))
 
     ctx.status = 200
@@ -47,7 +49,7 @@ async function getRoles(ctx) {
 
 async function createRole(ctx) {
   try {
-    const { name, status, sops, permissions } = ctx.request.body
+    const { name, status, sops, permissions /* patterns */ } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     // Query the database to find the maximum value among existing roles
@@ -59,8 +61,6 @@ async function createRole(ctx) {
     const newRole = new Role({
       value,
       status,
-      sops,
-      permissions,
     })
 
     // Handle translations based on the language value
@@ -69,6 +69,17 @@ async function createRole(ctx) {
     } else {
       newRole.translations = newRole.translations || new Map()
       newRole.translations.set(language, name)
+    }
+
+    if (sops !== undefined) newRole.sops = sops
+
+    // Convert pattern array to _id array for roles
+    if (permissions !== undefined) {
+      const perms = await Permission.find(
+        { pattern: { $in: permissions } },
+        '_id',
+      )
+      newRole.permissions = perms.map((p) => p._id)
     }
 
     await newRole.save()
@@ -109,9 +120,17 @@ async function updateRole(ctx) {
       role.markModified('translations')
     }
 
-    role.status = status
-    role.sops = sops
-    role.permissions = permissions
+    if (status !== undefined) role.status = status
+    if (sops !== undefined) role.sops = sops
+
+    // Convert pattern array to _id array for roles
+    if (permissions !== undefined) {
+      const perms = await Permission.find(
+        { pattern: { $in: permissions } },
+        '_id',
+      )
+      role.permissions = perms.map((p) => p._id)
+    }
 
     await role.save()
 

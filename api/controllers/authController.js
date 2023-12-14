@@ -115,11 +115,7 @@ const isAdmin = async (ctx, next) => {
   const language = ctx.cookies.get('language')
   const decoded = await verifyToken(token)
 
-  if (
-    !decoded ||
-    !decoded.roles ||
-    !decoded.roles.includes(0 /* Administrator */)
-  ) {
+  if (!decoded || !decoded.roles.some((role) => role.isAdmin)) {
     ctx.status = statusCodes.Forbidden
     ctx.body = getErrorMessage(statusCodes.Forbidden, language, 'adminOnly')
     return
@@ -212,7 +208,10 @@ async function login(ctx) {
     }
 
     // Find the user in the database
-    const user = await User.findOne({ username })
+    const user = await User.findOne({ username }).populate({
+      path: 'roles',
+      select: 'isAdmin',
+    })
 
     // Check if the user exists and verify the password
     if (user) {
