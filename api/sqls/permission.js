@@ -1,5 +1,5 @@
 const Permission = require('../models/permission')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting permissions
 async function insertPermissions() {

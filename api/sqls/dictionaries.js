@@ -1,5 +1,5 @@
 const Dictionary = require('../models/dictionary')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting barcode status dictionaries
 async function insertBarcodeStatus() {

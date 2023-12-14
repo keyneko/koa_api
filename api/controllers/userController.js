@@ -3,13 +3,13 @@ const Role = require('../models/role')
 const User = require('../models/user')
 const Permission = require('../models/permission')
 const authController = require('../controllers/authController')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 async function getUsers(ctx) {
   try {

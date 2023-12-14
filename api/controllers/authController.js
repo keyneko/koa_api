@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
 const TokenBlacklist = require('../models/tokenBlacklist')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 const secretKey = 'your-secret-key'
 

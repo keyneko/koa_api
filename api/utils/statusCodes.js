@@ -1,5 +1,4 @@
 // statusCodes.js
-
 // Function to get the translated error message based on the user's language or use a specified default message
 function getErrorMessage(errorCode, language, messageKey = 'default') {
   const errorCategory = statusMessages[errorCode]

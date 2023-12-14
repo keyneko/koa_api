@@ -1,5 +1,5 @@
 const Role = require('../models/role')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting roles
 async function insertRoles() {

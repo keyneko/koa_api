@@ -1,11 +1,11 @@
 const Permission = require('../models/permission')
 const authController = require('../controllers/authController')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 async function getPermissions(ctx) {
   try {

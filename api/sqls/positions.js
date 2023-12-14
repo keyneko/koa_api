@@ -1,6 +1,6 @@
 const Position = require('../models/position')
 const { generatePosition } = require('../controllers/positionController')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting positions
 async function insertPositions() {

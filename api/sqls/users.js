@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting users
 async function insertUsers() {

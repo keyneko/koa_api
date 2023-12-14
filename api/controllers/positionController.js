@@ -1,10 +1,10 @@
 const Position = require('../models/position')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 // Function to generate a position code
 async function generatePosition(areaCode, buildingCode, floorCode) {

@@ -1,10 +1,10 @@
 const Dictionary = require('../models/dictionary')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 async function getDictionaries(ctx) {
   try {

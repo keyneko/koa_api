@@ -7,7 +7,7 @@ const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 const projectRoot = process.cwd()
 

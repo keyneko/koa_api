@@ -2,12 +2,12 @@ const mongoose = require('mongoose')
 const Sensor = require('../models/Sensor')
 const SensorRecord = require('../models/SensorRecord')
 const authController = require('../controllers/authController')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 const {
   getErrorMessage,
   statusCodes,
   statusMessages,
-} = require('../statusCodes')
+} = require('../utils/statusCodes')
 
 async function getSensors(ctx) {
   try {

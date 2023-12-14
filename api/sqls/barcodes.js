@@ -1,6 +1,6 @@
 const Barcode = require('../models/barcode')
 const { generateBarcode } = require('../controllers/barcodeController')
-const { logger } = require('../logger')
+const { logger } = require('../utils/logger')
 
 // Inserting barcodes
 async function insertBarcodes() {

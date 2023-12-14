@@ -23,7 +23,7 @@ const transports = (filename) => [
     level: 'info',
     filename: path.join(logDirectory, moment().format('YYYY-MM'), filename),
     datePattern: 'YYYY-MM-DD',
-    zippedArchive: true, // Log files older than maxFiles will be compressed into a zip archive
+    zippedArchive: false, // Log files older than maxFiles will be compressed into a zip archive
     handleExceptions: true, // Capturing and logging unexpected errors
     json: false, // Makes the log entries more human-readable
     maxSize: '20m',
