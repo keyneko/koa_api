@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const roleSchema = new mongoose.Schema({
   value: {
     type: Number,
-    unique: true,
+    // unique: true,
     required: true,
   },
   name: {
@@ -17,6 +17,10 @@ const roleSchema = new mongoose.Schema({
   },
   sops: {
     type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  permissions: {
+    type: [String],
     default: [],
   },
   translations: {

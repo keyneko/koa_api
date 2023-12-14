@@ -16,10 +16,12 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
   },
-  roles: {
-    type: [Number],
-    default: [],
-  },
+  roles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Role',
+    },
+  ],
   // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,

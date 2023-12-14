@@ -242,10 +242,10 @@ async function updateBarcode(ctx) {
           [language]: updateData.basicUnit,
         }
       }
-    }
 
-    // Mark the modified fields to ensure they are saved
-    barcode.markModified('translations');
+      // Mark the modified fields to ensure they are saved
+      barcode.markModified('translations')
+    }
 
     barcode.quantity = updateData.quantity || barcode.quantity
     barcode.status = updateData.status || barcode.status

@@ -21,23 +21,21 @@ async function getUsers(ctx) {
 
     const users = await User.find()
       .select(['username', 'name', 'avatar', 'roles', 'status', 'translations'])
+      .populate('roles')
       .sort(sortOptions)
 
     // Add the 'token' field to each user object
-    const usersWithToken = users.map((user) => ({
-      _id: user._id,
-      username: user.username,
-      name: user.translations?.get(language) || user.name,
-      avatar: user.avatar,
-      roles: user.roles,
-      status: user.status,
-      token: authController.generateToken(user),
+    const mapped = users.map((d) => ({
+      ...d.toObject(),
+      name: d.translations?.get(language) || d.name,
+      permissions: [...new Set(d.roles.flatMap((role) => role.permissions))],
+      token: authController.generateToken(d),
     }))
 
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: usersWithToken,
+      data: mapped,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -57,6 +55,8 @@ async function getUser(ctx) {
       'roles',
       'translations',
     ])
+    // .populate('roles')
+
 
     if (!user) {
       ctx.status = statusCodes.NotFound

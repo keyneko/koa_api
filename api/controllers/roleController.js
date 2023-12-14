@@ -17,21 +17,27 @@ async function getRoles(ctx) {
     }
 
     const roles = await Role.find()
-      .select(['value', 'name', 'sops', 'status', 'translations'])
+      .select([
+        'value',
+        'name',
+        'status',
+        'sops',
+        'permissions',
+        'translations',
+      ])
       .sort(sortOptions)
 
-    const mappedRoles = roles.map((role) => ({
-      _id: role._id,
-      value: role.value,
-      name: role.translations?.get(language) || role.name,
-      sops: role.sops,
-      status: role.status,
+    const mapped = roles.map((d) => ({
+      ...d.toObject(),
+      name: d.translations?.get(language) || d.name,
+      translations: undefined,
+      _id: undefined,
     }))
 
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: mappedRoles,
+      data: mapped,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -41,7 +47,7 @@ async function getRoles(ctx) {
 
 async function createRole(ctx) {
   try {
-    const { name, sops, status } = ctx.request.body
+    const { name, status, sops, permissions } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     // Query the database to find the maximum value among existing roles
@@ -52,8 +58,9 @@ async function createRole(ctx) {
 
     const newRole = new Role({
       value,
-      sops,
       status,
+      sops,
+      permissions,
     })
 
     // Handle translations based on the language value
@@ -78,7 +85,7 @@ async function createRole(ctx) {
 
 async function updateRole(ctx) {
   try {
-    const { value, name, status, sops } = ctx.request.body
+    const { value, name, status, sops, permissions } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     const role = await Role.findOne({ value })
@@ -104,6 +111,7 @@ async function updateRole(ctx) {
 
     role.status = status
     role.sops = sops
+    role.permissions = permissions
 
     await role.save()
 

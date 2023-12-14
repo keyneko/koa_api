@@ -10,7 +10,7 @@ async function insertUsers() {
         username: 'admin',
         password: '123456',
         name: '超级管理员',
-        roles: [0], // Administrator Role
+        roles: [], // Administrator Role
         translations: {
           en: 'Super Admin',
           ja: 'スーパー管理者',

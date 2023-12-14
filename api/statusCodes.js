@@ -70,6 +70,7 @@ const statusMessages = {
       positionNotFound: '未找到库位码',
       dictionariesNotFound: '未找到字典',
       sensorNotFound: '未找到传感器',
+      permissionNotFound: '未找到权限词条',
     },
     translations: {
       en: {
@@ -80,6 +81,7 @@ const statusMessages = {
         positionNotFound: 'Position Not Found',
         dictionariesNotFound: 'Dictionaries Not Found',
         sensorNotFound: 'Sensor Not Found',
+        permissionNotFound: 'Permission entry Not Found',
       },
       ja: {
         default: '見つからない',
@@ -89,6 +91,7 @@ const statusMessages = {
         positionNotFound: 'ポジションが見つからない',
         dictionariesNotFound: '辞書が見つからない',
         sensorNotFound: 'センサーが見つからない',
+        permissionNotFound: 'パーミッションエントリが見つからない',
       },
     },
   },
