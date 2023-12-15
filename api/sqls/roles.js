@@ -7,9 +7,9 @@ async function insertRoles() {
     const data = [
       {
         name: '系统管理员',
-        value: 0,
+        value: "admin",
         isAdmin: true,
-        sops: [0, 1], // Roles、Users Management Sops
+        sops: [],
         permissions: [],
         translations: {
           en: 'Administrator',
@@ -18,7 +18,7 @@ async function insertRoles() {
       },
       {
         name: '仓管员',
-        value: 1,
+        value: "warehouse keeper",
         sops: [],
         translations: {
           en: 'Warehouse Keeper',
@@ -27,7 +27,7 @@ async function insertRoles() {
       },
       {
         name: '质检员',
-        value: 2,
+        value: "quality inspector",
         sops: [],
         translations: {
           en: 'Quality Inspector',
@@ -36,7 +36,7 @@ async function insertRoles() {
       },
       {
         name: '生产员',
-        value: 3,
+        value: "production worker",
         sops: [],
         translations: {
           en: 'Production Worker',
@@ -45,7 +45,7 @@ async function insertRoles() {
       },
       {
         name: '巡检员',
-        value: 4,
+        value: "patrol inspector",
         sops: [],
         translations: {
           en: 'Patrol Inspector',

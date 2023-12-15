@@ -241,7 +241,7 @@ async function insertSensorTypes() {
 }
 
 function insertDictionaries() {
-  insertSops()
+  // insertSops()
   insertStatus()
   insertBarcodeStatus()
   insertPositionStackable()

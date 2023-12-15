@@ -49,18 +49,11 @@ async function getRoles(ctx) {
 
 async function createRole(ctx) {
   try {
-    const { name, status, sops, permissions /* patterns */ } = ctx.request.body
+    const { value, name, sops, permissions /* patterns */ } = ctx.request.body
     const language = ctx.cookies.get('language')
-
-    // Query the database to find the maximum value among existing roles
-    const maxRole = await Role.findOne().sort('-value')
-
-    // Determine the new role's value by incrementing the maximum value
-    const value = maxRole ? maxRole.value + 1 : 1
 
     const newRole = new Role({
       value,
-      status,
     })
 
     // Handle translations based on the language value
@@ -86,7 +79,7 @@ async function createRole(ctx) {
 
     ctx.body = {
       code: 200,
-      data: value,
+      data: newRole._id,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -146,11 +139,18 @@ async function updateRole(ctx) {
 
 async function deleteRole(ctx) {
   try {
-    const { value } = ctx.query
+    const { _id } = ctx.query
     const language = ctx.cookies.get('language')
 
+    const role = await Role.findById(_id)
+    if (!role) {
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(statusCodes.NotFound, language, 'roleNotFound')
+      return
+    }
+
     // Check if the role being deleted is admin
-    if (value == 0 /* Administrator */) {
+    if (role.isAdmin) {
       ctx.status = statusCodes.Forbidden
       ctx.body = getErrorMessage(
         statusCodes.Forbidden,
@@ -160,7 +160,7 @@ async function deleteRole(ctx) {
       return
     }
 
-    const result = await Role.findOneAndDelete({ value })
+    const result = await Role.findByIdAndDelete(_id)
     if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(statusCodes.NotFound, language, 'roleNotFound')

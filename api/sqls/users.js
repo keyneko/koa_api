@@ -19,7 +19,7 @@ async function insertUsers() {
       {
         username: 'keyneko',
         password: '123456',
-        name: '流水线操作工',
+        name: '搬运工',
         roles: [],
         translations: {
           en: 'Brick Carrier',
