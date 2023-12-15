@@ -11,13 +11,13 @@ async function getPermissions(ctx) {
   try {
     const language = ctx.cookies.get('language')
 
-    const permissions = await Permission.find().select([
-      'name',
-      'description',
-      'pattern',
-      'status',
-      'translations',
-    ])
+    const sortOptions = {
+      pattern: 1,
+    }
+
+    const permissions = await Permission.find()
+      .select(['name', 'description', 'pattern', 'status', 'translations'])
+      .sort(sortOptions)
 
     const mapped = permissions.map((d) => ({
       ...d.toObject(),
@@ -66,6 +66,7 @@ async function createPermission(ctx) {
 
     ctx.body = {
       code: 200,
+      data: newPermission._id,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -79,6 +80,7 @@ async function updatePermission(ctx) {
     const language = ctx.cookies.get('language')
 
     const permission = await Permission.findById(_id)
+
     if (!permission) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
@@ -91,7 +93,8 @@ async function updatePermission(ctx) {
 
     // Update default fields for 'zh' or undefined language
     if (language === 'zh' || language === undefined) {
-      permission.name = name
+      permission.name = name || permission.name
+      if (description != undefined) permission.description = description
     } else {
       // Update translations based on the specified language
       if (name) {
@@ -101,7 +104,7 @@ async function updatePermission(ctx) {
         }
       }
 
-      if (description) {
+      if (description != undefined) {
         permission.translations.description = {
           ...(permission.translations.description || {}),
           [language]: description,
@@ -112,8 +115,8 @@ async function updatePermission(ctx) {
       permission.markModified('translations')
     }
 
-    permission.pattern = pattern
-    permission.status = status
+    if (pattern != undefined) permission.pattern = pattern
+    if (status != undefined) permission.status = status
 
     await permission.save()
 

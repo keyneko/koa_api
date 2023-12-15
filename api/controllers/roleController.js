@@ -10,7 +10,7 @@ const {
 
 async function getRoles(ctx) {
   try {
-    const { sortBy = '_id', sortOrder = 'desc' /* asc */ } = ctx.query
+    const { sortBy = '_id', sortOrder = 'asc' } = ctx.query
     const language = ctx.cookies.get('language')
 
     const sortOptions = {
