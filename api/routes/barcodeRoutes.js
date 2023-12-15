@@ -34,7 +34,7 @@ barcodeRouter.put(
 // Delete a barcode by value
 barcodeRouter.delete(
   '/barcode',
-  authController.hasToken,
+  authController.isAdmin,
   barcodeController.deleteBarcode,
 )
 

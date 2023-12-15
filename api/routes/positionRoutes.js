@@ -34,7 +34,7 @@ positionRouter.put(
 // Delete a position by value
 positionRouter.delete(
   '/position',
-  authController.hasToken,
+  authController.isAdmin,
   positionController.deletePosition,
 )
 

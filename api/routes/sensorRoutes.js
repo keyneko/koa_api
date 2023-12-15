@@ -27,7 +27,7 @@ sensorRouter.put(
 // Delete a sensor
 sensorRouter.delete(
   '/sensor',
-  authController.hasToken,
+  authController.isAdmin,
   sensorController.deleteSensor,
 )
 
