@@ -55,6 +55,8 @@ sudo chmod 700 /var/lib/mongodb
 mongod --version
 mongosh "mongodb://localhost:27017/test"
 show collections
+db.roles.drop()
+db.users.drop()
 ```
 ```javascript
 db.users.find()
@@ -125,6 +127,9 @@ sudo systemctl reload nginx
 sudo tail -f /var/log/nginx/error.log
 # 确保 Nginx 用户（通常是 www-data）有权限访问 
 sudo chown -R www-data:www-data /home/ubuntu/app/koa_app
+# ubuntu用户
+sudo chown -R ubuntu:ubuntu /home/ubuntu/app/koa_app/
+ls -l koa_app
 ps aux | grep nginx
 ```
 
