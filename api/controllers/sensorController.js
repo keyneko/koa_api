@@ -1,7 +1,7 @@
 const uuid = require('uuid')
 const mongoose = require('mongoose')
-const Sensor = require('../models/Sensor')
-const SensorRecord = require('../models/SensorRecord')
+const Sensor = require('../models/sensor')
+const SensorRecord = require('../models/sensorRecord')
 const authController = require('../controllers/authController')
 const { logger } = require('../utils/logger')
 const {
@@ -56,8 +56,8 @@ async function getSensors(ctx) {
       'type',
       'number',
       'manufacturer',
-      'apiKey',
       'status',
+      'isProtected',
       'translations',
     ])
 
@@ -75,12 +75,13 @@ async function getSensors(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
 async function createSensor(ctx) {
   try {
-    const { name, number, type, manufacturer } = ctx.request.body
+    const { name, number, type, isProtected, manufacturer } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     // Generate a new API key using uuid
@@ -90,6 +91,7 @@ async function createSensor(ctx) {
       type,
       number,
       apiKey,
+      isProtected,
     })
 
     // Handle translations based on language
@@ -116,12 +118,14 @@ async function createSensor(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
 async function updateSensor(ctx) {
   try {
-    const { _id, name, number, manufacturer, type, status } = ctx.request.body
+    const { _id, name, number, manufacturer, type, status, isProtected } =
+      ctx.request.body
     const language = ctx.cookies.get('language')
 
     const sensor = await Sensor.findById(_id)
@@ -162,6 +166,7 @@ async function updateSensor(ctx) {
     if (type !== undefined) sensor.type = type
     if (number !== undefined) sensor.number = number
     if (status !== undefined) sensor.status = status
+    if (isProtected !== undefined) sensor.isProtected = isProtected
 
     await sensor.save()
 
@@ -172,6 +177,7 @@ async function updateSensor(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -180,12 +186,25 @@ async function deleteSensor(ctx) {
     const { _id } = ctx.query
     const language = ctx.cookies.get('language')
 
-    if (!(await validateSensorId(_id))) {
+    const sensor = await validateSensorId(_id)
+
+    if (!sensor) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
         language,
         'sensorNotFound',
+      )
+      return
+    }
+
+    // Check if it is protected
+    if (sensor.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedSensor',
       )
       return
     }
@@ -207,22 +226,23 @@ async function deleteSensor(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
 async function validateSensorId(sensorId) {
   // Validate that sensorId is a valid ObjectId
   if (!mongoose.Types.ObjectId.isValid(sensorId)) {
-    return false
+    return null
   }
 
   // Validate that the provided sensorId corresponds to an existing Sensor
   const sensor = await Sensor.findById(sensorId)
   if (!sensor) {
-    return false
+    return null
   }
 
-  return true
+  return sensor
 }
 
 async function getRecords(ctx) {
@@ -276,6 +296,7 @@ async function getRecords(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -308,6 +329,7 @@ async function createRecord(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 

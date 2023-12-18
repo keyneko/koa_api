@@ -52,7 +52,7 @@ async function generatePosition(areaCode, buildingCode, floorCode) {
     return positionCode
   } catch (error) {
     // Handle any errors that may occur during the database query
-    console.error(error)
+    logger.error(error.message)
     throw new Error('Error generating position code')
   }
 }
@@ -108,6 +108,7 @@ async function getPositions(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -148,6 +149,7 @@ async function getPosition(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -194,6 +196,7 @@ async function createPosition(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -245,6 +248,7 @@ async function updatePosition(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -270,6 +274,7 @@ async function deletePosition(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 

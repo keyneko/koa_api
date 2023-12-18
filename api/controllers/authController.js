@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
-const Sensor = require('../models/Sensor')
+const Sensor = require('../models/sensor')
 const TokenBlacklist = require('../models/tokenBlacklist')
 const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
@@ -41,7 +41,7 @@ async function cleanupTokenBlacklist() {
     await TokenBlacklist.deleteMany({ createdAt: { $lt: expirationThreshold } })
   } catch (error) {
     logger.error('Token blacklist cleanup error:')
-    logger.error(error)
+    logger.error(error.message)
   }
 }
 setInterval(cleanupTokenBlacklist, 24 * 60 * 60 * 1000) // Check every 24 hours
@@ -227,6 +227,7 @@ async function register(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -272,6 +273,7 @@ async function login(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -304,6 +306,7 @@ async function logout(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 

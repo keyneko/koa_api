@@ -41,6 +41,7 @@ async function getPermissions(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -79,6 +80,7 @@ async function createPermission(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -137,6 +139,7 @@ async function updatePermission(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -180,6 +183,7 @@ async function deletePermission(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 

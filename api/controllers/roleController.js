@@ -45,6 +45,7 @@ async function getRoles(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -87,6 +88,7 @@ async function createRole(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -139,6 +141,7 @@ async function updateRole(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 
@@ -189,6 +192,7 @@ async function deleteRole(ctx) {
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 }
 

@@ -51,6 +51,7 @@ const statusMessages = {
       protectedPermission: '禁止操作：无法删除受保护的权限词条',
       protectedRole: '禁止操作：无法删除受保护的角色',
       protectedUser: '禁止操作：无法删除受保护的用户',
+      protectedSensor: '禁止操作：无法删除受保护的传感器',
     },
     translations: {
       en: {
@@ -61,6 +62,8 @@ const statusMessages = {
           'Prohibited operation: Protected permission entry cannot be deleted',
         protectedRole: 'Forbidden operation: Protected role cannot be deleted',
         protectedUser: 'Forbidden operation: Protected user cannot be deleted',
+        protectedSensor:
+          'Forbidden operation: Protected sensor cannot be deleted',
       },
       ja: {
         default: '禁止操作',
@@ -70,6 +73,7 @@ const statusMessages = {
           '禁止操作: 保護されているパーミッションエントリを削除できません',
         protectedRole: '禁止操作: 保護されたロールは削除できません',
         protectedUser: '禁止操作: 保護されたユーザーは削除できません',
+        protectedSensor: '禁止操作: 保護されたセンサーは削除できません',
       },
     },
   },

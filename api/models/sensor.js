@@ -6,7 +6,6 @@ const sensorSchema = new mongoose.Schema({
   },
   number: {
     type: String,
-    unique: true,
   },
   type: {
     type: Number,
@@ -23,6 +22,9 @@ const sensorSchema = new mongoose.Schema({
     type: Number,
     enum: [0, 1],
     default: 1,
+  },
+  isProtected: {
+    type: Boolean,
   },
   translations: {
     type: mongoose.Schema.Types.Mixed,

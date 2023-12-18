@@ -1,7 +1,7 @@
 const Router = require('koa-router')
 const logRouter = new Router()
 const authController = require('../controllers/authController')
-const { frontend: logger } = require('../utils/logger')
+const { frontend, logger } = require('../utils/logger')
 const {
   getErrorMessage,
   statusCodes,
@@ -14,13 +14,14 @@ logRouter.post('/log', authController.hasToken, async (ctx) => {
     const { message, stack } = ctx.request.body
 
     // Log the error
-    logger.error(message)
-    if (stack) logger.error(stack)
+    frontend.error(message)
+    if (stack) frontend.error(stack)
 
     ctx.body = { code: 200 }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
     ctx.body = error.message
+    logger.error(error.message)
   }
 })
 
