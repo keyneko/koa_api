@@ -57,6 +57,7 @@ async function getSensors(ctx) {
       'number',
       'manufacturer',
       'status',
+      'apiKey',
       'isProtected',
       'translations',
     ])
