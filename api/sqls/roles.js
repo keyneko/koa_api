@@ -1,4 +1,5 @@
 const Role = require('../models/role')
+const Permission = require('../models/permission')
 const { logger } = require('../utils/logger')
 
 // Inserting roles
@@ -7,7 +8,7 @@ async function insertRoles() {
     const data = [
       {
         name: '系统管理员',
-        value: "admin",
+        value: 'admin',
         isAdmin: true,
         sops: [],
         permissions: [],
@@ -18,7 +19,7 @@ async function insertRoles() {
       },
       {
         name: '仓管员',
-        value: "warehouse keeper",
+        value: 'warehouse keeper',
         sops: [],
         translations: {
           en: 'Warehouse Keeper',
@@ -27,7 +28,7 @@ async function insertRoles() {
       },
       {
         name: '质检员',
-        value: "quality inspector",
+        value: 'quality inspector',
         sops: [],
         translations: {
           en: 'Quality Inspector',
@@ -36,7 +37,7 @@ async function insertRoles() {
       },
       {
         name: '生产员',
-        value: "production worker",
+        value: 'production worker',
         sops: [],
         translations: {
           en: 'Production Worker',
@@ -45,7 +46,7 @@ async function insertRoles() {
       },
       {
         name: '巡检员',
-        value: "patrol inspector",
+        value: 'patrol inspector',
         sops: [],
         translations: {
           en: 'Patrol Inspector',
@@ -67,4 +68,40 @@ async function insertRoles() {
   }
 }
 
-module.exports = { insertRoles }
+async function assignAdminRolesWithWildcardPermission() {
+  try {
+    // Find the wildcard permission with pattern '*:*:*'
+    const wildcardPermission = await Permission.findOne({ pattern: '*:*:*' })
+
+    if (!wildcardPermission) {
+      console.log('Wildcard permission not found.')
+      return
+    }
+
+    // Find admin roles
+    const adminRoles = await Role.find({ isAdmin: true })
+
+    // Update each admin role's permissions list with the wildcard permission
+    const updatePromises = adminRoles.map(async (adminRole) => {
+      // Clear the existing permissions list
+      adminRole.permissions = []
+
+      // Add the wildcard permission to the permissions list
+      adminRole.permissions.push(wildcardPermission._id)
+
+      // Save the updated admin role
+      await adminRole.save()
+    })
+
+    // Wait for all updates to complete
+    await Promise.all(updatePromises)
+
+    console.log('Admin roles upadted with wildcard permission successfully.')
+  } catch (error) {
+    console.error(
+      'An error occurred when upadted admin roles with wildcard permission.',
+    )
+  }
+}
+
+module.exports = { insertRoles, assignAdminRolesWithWildcardPermission }

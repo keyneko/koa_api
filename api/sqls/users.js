@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const Role = require('../models/role')
 const User = require('../models/user')
 const { logger } = require('../utils/logger')
 
@@ -48,4 +49,31 @@ async function insertUsers() {
   }
 }
 
-module.exports = { insertUsers }
+async function assignAdminRoleToUser() {
+  try {
+    // Find the role with name 'isAdmin'
+    const adminRole = await Role.findOne({ isAdmin: true })
+
+    if (!adminRole) {
+      console.log('Role with name "isAdmin" not found.')
+      return
+    }
+
+    // Find the user with username 'admin' and update roles array
+    const user = await User.findOneAndUpdate(
+      { username: 'admin' },
+      { roles: [adminRole._id] }, // Set the roles array with the new role
+      { new: true }, // Return the updated document
+    )
+
+    if (user) {
+      console.log('Role added to the user successfully.')
+    } else {
+      console.log('User with username "admin" not found.')
+    }
+  } catch (error) {
+    console.error('Error assigning admin role to user:', error.message)
+  }
+}
+
+module.exports = { insertUsers, assignAdminRoleToUser }
