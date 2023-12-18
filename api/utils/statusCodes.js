@@ -25,17 +25,20 @@ const statusMessages = {
       default: '未授权',
       missingToken: '未授权：缺少令牌',
       invalidToken: '未授权：无效令牌',
+      invalidApiKey: '未授权：apiKey无效',
     },
     translations: {
       en: {
         default: 'Unauthorized',
         missingToken: 'Unauthorized: Missing token',
         invalidToken: 'Unauthorized: Invalid token',
+        invalidApiKey: 'Unauthorized: Invalid apiKey',
       },
       ja: {
         default: '権限がありません',
         missingToken: '権限がありません: トークンがありません',
         invalidToken: '権限がありません: 無効なトークン',
+        invalidApiKey: '権限がありません: 無効なAPIKey',
       },
     },
   },

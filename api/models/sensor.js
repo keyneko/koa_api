@@ -14,6 +14,10 @@ const sensorSchema = new mongoose.Schema({
   manufacturer: {
     type: String,
   },
+  apiKey: {
+    type: String,
+    unique: true,
+  },
   // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,

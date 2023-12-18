@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const User = require('../models/user')
+const Sensor = require('../models/Sensor')
 const TokenBlacklist = require('../models/tokenBlacklist')
 const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
@@ -125,6 +126,40 @@ const isAdmin = async (ctx, next) => {
   ctx.state.decoded = decoded
 
   await next()
+}
+
+const hasApiKey = async (ctx, next) => {
+  const apiKey = ctx.headers.apikey
+  const token = ctx.headers.authorization
+  const language = ctx.cookies.get('language')
+
+  if (!token) {
+    // Token is not present, check for API key
+    if (apiKey) {
+      const sensor = await Sensor.findOne({ apiKey })
+
+      if (sensor && sensor.status === 1) {
+        // API key is valid and sensor is active, proceed to the next middleware or route
+        await next()
+      } else {
+        ctx.status = statusCodes.Unauthorized
+        ctx.body = getErrorMessage(
+          statusCodes.Unauthorized,
+          language,
+          'invalidApiKey',
+        )
+      }
+    } else {
+      ctx.status = statusCodes.Unauthorized
+      ctx.body = getErrorMessage(
+        statusCodes.Unauthorized,
+        language,
+        'missingToken',
+      )
+    }
+  } else {
+    await next()
+  }
 }
 
 function captcha(ctx) {
@@ -280,4 +315,5 @@ module.exports = {
   generateToken,
   hasToken,
   isAdmin,
+  hasApiKey,
 }

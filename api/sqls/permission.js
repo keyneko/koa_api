@@ -124,6 +124,16 @@ async function insertPermissions() {
           },
         },
       },
+      {
+        name: '温湿度传感器',
+        pattern: 'sensors:dht11:*',
+        translations: {
+          name: {
+            en: 'Temperature & Humidity Sensor',
+            ja: '温湿度センサー',
+          },
+        },
+      },
     ]
 
     const promises = data.map((item) => {

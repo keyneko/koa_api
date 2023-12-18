@@ -41,7 +41,7 @@ sensorRouter.get(
 // Create a record
 sensorRouter.post(
   '/sensor/record',
-  authController.hasToken,
+  authController.hasApiKey,
   sensorController.createRecord,
 )
 

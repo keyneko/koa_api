@@ -10,7 +10,8 @@ const sensorRecordSchema = new mongoose.Schema({
     default: Date.now,
   },
   value: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
+    required: true,
   },
   options: {
     type: Object,

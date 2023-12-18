@@ -1,3 +1,4 @@
+const uuid = require('uuid')
 const mongoose = require('mongoose')
 const Sensor = require('../models/Sensor')
 const SensorRecord = require('../models/SensorRecord')
@@ -55,6 +56,7 @@ async function getSensors(ctx) {
       'type',
       'number',
       'manufacturer',
+      'apiKey',
       'status',
       'translations',
     ])
@@ -81,9 +83,13 @@ async function createSensor(ctx) {
     const { name, number, type, manufacturer } = ctx.request.body
     const language = ctx.cookies.get('language')
 
+    // Generate a new API key using uuid
+    const apiKey = uuid.v4()
+
     const newSensor = new Sensor({
       type,
       number,
+      apiKey,
     })
 
     // Handle translations based on language
@@ -272,7 +278,7 @@ async function getRecords(ctx) {
 
 async function createRecord(ctx) {
   try {
-    const { dateTime, sensorId, sensorName, value } = ctx.request.body
+    const { sensorId, value } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     if (!(await validateSensorId(sensorId))) {
@@ -285,13 +291,9 @@ async function createRecord(ctx) {
       return
     }
 
-    // Convert the dateTime string to a Date object
-    const createdAt = new Date(dateTime)
-
     const newRecord = new SensorRecord({
-      createdAt,
+      createdAt: new Date(),
       sensorId,
-      sensorName,
       value,
     })
 
