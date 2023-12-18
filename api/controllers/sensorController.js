@@ -249,13 +249,16 @@ async function getRecords(ctx) {
     // Convert the provided dateTime to a JavaScript Date object
     const queryDateTime = dateTime ? new Date(dateTime) : new Date()
 
-    // Calculate the start time for the past 24 hours
-    const startTime = new Date(queryDateTime.getTime() - 24 * 60 * 60 * 1000)
+    // Set the time to 0:00:00 for the current day
+    queryDateTime.setHours(0, 0, 0, 0)
 
-    // Add a condition to the query to filter records within the past 24 hours
+    // Calculate the end time for the current day (23:59:59)
+    const endTime = new Date(queryDateTime.getTime() + 24 * 60 * 60 * 1000 - 1)
+
+    // Add a condition to the query to filter records within the current day
     query.createdAt = {
-      $gte: startTime,
-      $lte: queryDateTime,
+      $gte: queryDateTime,
+      $lte: endTime,
     }
 
     const records = await SensorRecord.find(query)
