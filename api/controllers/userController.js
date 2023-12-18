@@ -21,7 +21,15 @@ async function getUsers(ctx) {
     }
 
     const users = await User.find()
-      .select(['username', 'name', 'avatar', 'roles', 'status', 'translations'])
+      .select([
+        'username',
+        'name',
+        'avatar',
+        'roles',
+        'status',
+        'isProtected',
+        'translations',
+      ])
       .populate({
         path: 'roles',
         populate: {
@@ -76,6 +84,7 @@ async function getUser(ctx) {
         'roles',
         'denyPermissions',
         'status',
+        'isProtected',
         'translations',
       ])
       .populate({
@@ -133,6 +142,7 @@ async function updateUser(ctx) {
       roles,
       denyPermissions,
       status,
+      isProtected,
     } = ctx.request.body
     const language = ctx.cookies.get('language')
 
@@ -190,6 +200,7 @@ async function updateUser(ctx) {
 
     if (avatar !== undefined) user.avatar = avatar
     if (status !== undefined) user.status = status
+    if (isProtected !== undefined) user.isProtected = isProtected
 
     // Convert value array to _id array for roles
     if (roles !== undefined) {
@@ -241,6 +252,17 @@ async function deleteUser(ctx) {
         statusCodes.Forbidden,
         language,
         'cannotDeleteAdmin',
+      )
+      return
+    }
+
+    // Check if it is protected
+    if (user.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedUser',
       )
       return
     }

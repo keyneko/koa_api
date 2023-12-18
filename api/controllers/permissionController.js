@@ -16,7 +16,14 @@ async function getPermissions(ctx) {
     }
 
     const permissions = await Permission.find()
-      .select(['name', 'description', 'pattern', 'status', 'translations'])
+      .select([
+        'name',
+        'description',
+        'pattern',
+        'status',
+        'isProtected',
+        'translations',
+      ])
       .sort(sortOptions)
 
     const mapped = permissions.map((d) => ({
@@ -39,13 +46,14 @@ async function getPermissions(ctx) {
 
 async function createPermission(ctx) {
   try {
-    const { name, description, pattern } = ctx.request.body
+    const { name, description, pattern, isProtected } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     const newPermission = new Permission({
       name,
       description,
       pattern,
+      isProtected,
     })
 
     // Handle translations based on the language value
@@ -76,7 +84,8 @@ async function createPermission(ctx) {
 
 async function updatePermission(ctx) {
   try {
-    const { _id, name, description, pattern, status } = ctx.request.body
+    const { _id, name, description, pattern, status, isProtected } =
+      ctx.request.body
     const language = ctx.cookies.get('language')
 
     const permission = await Permission.findById(_id)
@@ -117,6 +126,7 @@ async function updatePermission(ctx) {
 
     if (pattern != undefined) permission.pattern = pattern
     if (status != undefined) permission.status = status
+    if (isProtected !== undefined) permission.isProtected = isProtected
 
     await permission.save()
 
@@ -135,14 +145,32 @@ async function deletePermission(ctx) {
     const { _id } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const result = await Permission.findByIdAndDelete(_id)
-    if (!result) {
+    // Find the permission
+    const permission = await Permission.findById(_id)
+    if (!permission) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
         language,
         'permissionNotFound',
       )
+      return
+    }
+
+    // Check if it is protected
+    if (permission.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedPermission',
+      )
+      return
+    }
+
+    // If not protected, delete the permission
+    const result = await Permission.findByIdAndDelete(_id)
+    if (!result) {
       return
     }
 

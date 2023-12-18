@@ -45,17 +45,28 @@ const statusMessages = {
       default: '禁止操作',
       adminOnly: '禁止操作：仅限管理员',
       cannotDeleteAdmin: '禁止操作：无法删除管理员角色',
+      protectedPermission: '禁止操作：无法删除受保护的权限词条',
+      protectedRole: '禁止操作：无法删除受保护的角色',
+      protectedUser: '禁止操作：无法删除受保护的用户',
     },
     translations: {
       en: {
         default: 'Permission denied',
         adminOnly: 'Forbidden Operation (Admin Only)',
-        cannotDeleteAdmin: 'Forbidden: Cannot delete admin role',
+        cannotDeleteAdmin: 'Forbidden operation: Cannot delete admin role',
+        protectedPermission:
+          'Prohibited operation: Protected permission entry cannot be deleted',
+        protectedRole: 'Forbidden operation: Protected role cannot be deleted',
+        protectedUser: 'Forbidden operation: Protected user cannot be deleted',
       },
       ja: {
         default: '禁止操作',
         adminOnly: '禁止操作：管理者限定',
         cannotDeleteAdmin: '禁止操作: 管理者ロールを削除できません',
+        protectedPermission:
+          '禁止操作: 保護されているパーミッションエントリを削除できません',
+        protectedRole: '禁止操作: 保護されたロールは削除できません',
+        protectedUser: '禁止操作: 保護されたユーザーは削除できません',
       },
     },
   },

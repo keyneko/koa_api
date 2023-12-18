@@ -11,6 +11,7 @@ async function insertUsers() {
         username: 'admin',
         password: '123456',
         name: '超级管理员',
+        isProtected: true,
         roles: [], // Administrator Role
         translations: {
           en: 'Super Admin',
@@ -21,6 +22,7 @@ async function insertUsers() {
         username: 'keyneko',
         password: '123456',
         name: '搬运工',
+        isProtected: true,
         roles: [],
         translations: {
           en: 'Brick Carrier',

@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  isProtected: {
+    type: Boolean,
+  },
   avatar: {
     type: String,
   },

@@ -22,6 +22,7 @@ async function getRoles(ctx) {
         'value',
         'name',
         'status',
+        'isProtected',
         'sops',
         'permissions',
         'translations',
@@ -49,11 +50,13 @@ async function getRoles(ctx) {
 
 async function createRole(ctx) {
   try {
-    const { value, name, sops, permissions /* patterns */ } = ctx.request.body
+    const { value, name, isProtected, sops, permissions /* patterns */ } =
+      ctx.request.body
     const language = ctx.cookies.get('language')
 
     const newRole = new Role({
       value,
+      isProtected,
     })
 
     // Handle translations based on the language value
@@ -89,7 +92,8 @@ async function createRole(ctx) {
 
 async function updateRole(ctx) {
   try {
-    const { value, name, status, sops, permissions } = ctx.request.body
+    const { value, name, status, isProtected, sops, permissions } =
+      ctx.request.body
     const language = ctx.cookies.get('language')
 
     const role = await Role.findOne({ value })
@@ -114,6 +118,7 @@ async function updateRole(ctx) {
     }
 
     if (status !== undefined) role.status = status
+    if (isProtected !== undefined) role.isProtected = isProtected
     if (sops !== undefined) role.sops = sops
 
     // Convert pattern array to _id array for roles
@@ -156,6 +161,17 @@ async function deleteRole(ctx) {
         statusCodes.Forbidden,
         language,
         'cannotDeleteAdmin',
+      )
+      return
+    }
+
+    // Check if it is protected
+    if (role.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedRole',
       )
       return
     }

@@ -10,6 +10,7 @@ async function insertPermissions() {
         name: '管理员权限',
         description: '通配权限，这是最大权限了',
         pattern: '*:*:*',
+        isProtected: true,
         translations: {
           name: {
             en: 'Administrator Permissions',
@@ -26,6 +27,7 @@ async function insertPermissions() {
       {
         name: '角色管理',
         pattern: 'roles:*:*',
+        isProtected: true,
         translations: {
           name: {
             en: 'Roles Management',
@@ -38,6 +40,7 @@ async function insertPermissions() {
       {
         name: '用户管理',
         pattern: 'users:*:*',
+        isProtected: true,
         translations: {
           name: {
             en: 'Users Management',

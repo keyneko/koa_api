@@ -13,6 +13,9 @@ const permissionSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  isProtected: {
+    type: Boolean,
+  },
   // Status of the dictionary: 0 (invalid), 1 (valid)
   status: {
     type: Number,

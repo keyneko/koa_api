@@ -10,6 +10,7 @@ async function insertRoles() {
         name: '系统管理员',
         value: 'admin',
         isAdmin: true,
+        isProtected: true,
         sops: [],
         permissions: [],
         translations: {
@@ -20,6 +21,7 @@ async function insertRoles() {
       {
         name: '仓管员',
         value: 'warehouse keeper',
+        isProtected: true,
         sops: [],
         translations: {
           en: 'Warehouse Keeper',
@@ -29,6 +31,7 @@ async function insertRoles() {
       {
         name: '质检员',
         value: 'quality inspector',
+        isProtected: true,
         sops: [],
         translations: {
           en: 'Quality Inspector',
@@ -38,6 +41,7 @@ async function insertRoles() {
       {
         name: '生产员',
         value: 'production worker',
+        isProtected: true,
         sops: [],
         translations: {
           en: 'Production Worker',
