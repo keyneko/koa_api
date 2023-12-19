@@ -129,16 +129,16 @@ const isAdmin = async (ctx, next) => {
 }
 
 const hasApiKey = async (ctx, next) => {
-  const apiKey = ctx.headers.apikey
-  const token = ctx.headers.authorization
+  const { apikey, authorization: token } = ctx.headers
+  const { sensorId } = ctx.request.body
   const language = ctx.cookies.get('language')
 
   if (!token) {
     // Token is not present, check for API key
-    if (apiKey) {
-      const sensor = await Sensor.findOne({ apiKey })
+    if (apikey) {
+      const sensor = await Sensor.findById(sensorId)
 
-      if (sensor && sensor.status === 1) {
+      if (sensor && sensor.apiKey === apikey) {
         // API key is valid and sensor is active, proceed to the next middleware or route
         await next()
       } else {
@@ -154,7 +154,7 @@ const hasApiKey = async (ctx, next) => {
       ctx.body = getErrorMessage(
         statusCodes.Unauthorized,
         language,
-        'missingToken',
+        'missingApiKey',
       )
     }
   } else {
