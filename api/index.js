@@ -62,6 +62,7 @@ app.use(dictionaryRoutes.routes())
 app.use(sensorRoutes.routes())
 
 require('./sqls')
+require('./utils/mqttServer')
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {

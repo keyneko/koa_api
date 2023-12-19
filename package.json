@@ -9,6 +9,7 @@
     "start:prod": "cross-env NODE_ENV=production node api/index.js"
   },
   "dependencies": {
+    "aedes": "^0.50.1",
     "bcrypt": "^5.1.1",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",
@@ -20,6 +21,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "mongoose": "^7.6.5",
+    "mqtt": "^5.3.3",
     "node-rsa": "^1.1.1",
     "svg-captcha": "^1.4.0",
     "uuid": "^9.0.1",
