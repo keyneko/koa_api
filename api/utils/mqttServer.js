@@ -1,6 +1,13 @@
 const aedes = require('aedes')()
 const server = require('net').createServer(aedes.handle)
 const Sensor = require('../models/sensor')
+const SensorRecord = require('../models/sensorRecord')
+const {
+  authenticateMqttClient,
+  processMqttSensorData,
+  updateSensorOnlineStatus,
+} = require('../controllers/mqttController')
+
 const port = 1883
 
 // Connected clients array
@@ -8,46 +15,29 @@ let connectedClients = new Map()
 
 // Authenticate clients based on API Key
 aedes.authenticate = async (client, username, password, callback) => {
+  // client.id is associated with sensorSchema's objectId
   const id = client.id
   const apiKey = password.toString()
-
-  try {
-    // Check if the API Key is valid and map to a client ID
-    const sensor = await Sensor.findById(id)
-
-    if (sensor && sensor.apiKey === apiKey) {
-      callback(null, true)
-    } else {
-      callback(null, false)
-    }
-  } catch (e) {
-    callback(e, false)
-  }
+  authenticateMqttClient(id, apiKey, callback)
 }
 
 // Handle client connect event
-aedes.on('client', (client) => {
+aedes.on('client', async (client) => {
   console.log('Client connected:', client.id)
+
+  // Update the sensor's online field to true
+  await updateSensorOnlineStatus(client.id, true)
 
   // Add the client to the connectedClients map
   connectedClients.set(client.id, client)
-
-  // Example: Sending '1' to the newly connected client
-  setInterval(() => {
-    // sendOnOffCommand(client.id, '1')
-
-    aedes.publish({
-      topic: `home/devices/onoff/${client.id}`,
-      payload: '1',
-      qos: 0,
-      retain: false,
-    })
-  }, 5000)
 })
 
 // Handle client disconnect event
-aedes.on('clientDisconnect', (client) => {
+aedes.on('clientDisconnect', async (client) => {
   console.log('Client disconnected:', client.id)
+
+  // Update the sensor's online field to false
+  await updateSensorOnlineStatus(client.id, false)
 
   // Remove the client from the connectedClients map
   connectedClients.delete(client.id)
@@ -65,15 +55,14 @@ aedes.on('subscribe', (subscriptions, client) => {
 })
 
 // Handle client publish event
-aedes.on('publish', (packet, client) => {
+aedes.on('publish', async (packet, client) => {
+  // Process the status update
   if (packet.topic === 'home/devices/status') {
     console.log(
-      'Received status update from client',
-      client.id,
-      ':',
+      `Received from client ${client.id}: `,
       packet.payload.toString(),
     )
-    // Process the status update
+    processMqttSensorData(client, packet)
   }
 })
 
