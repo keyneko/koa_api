@@ -58,8 +58,9 @@ async function getSensors(ctx) {
       'manufacturer',
       'apiKey',
       'status',
-      'online',
       'isProtected',
+      'online',
+      'topics',
       'translations',
     ])
 
@@ -83,7 +84,7 @@ async function getSensors(ctx) {
 
 async function createSensor(ctx) {
   try {
-    const { name, number, type, isProtected, manufacturer } = ctx.request.body
+    const { name, number, type, isProtected, manufacturer, topics } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     // Generate a new API key using uuid
@@ -94,6 +95,7 @@ async function createSensor(ctx) {
       number,
       apiKey,
       isProtected,
+      topics,
     })
 
     // Handle translations based on language
@@ -126,7 +128,7 @@ async function createSensor(ctx) {
 
 async function updateSensor(ctx) {
   try {
-    const { _id, name, number, manufacturer, type, status, isProtected } =
+    const { _id, name, number, manufacturer, type, status, isProtected, topics } =
       ctx.request.body
     const language = ctx.cookies.get('language')
 
@@ -169,6 +171,7 @@ async function updateSensor(ctx) {
     if (number !== undefined) sensor.number = number
     if (status !== undefined) sensor.status = status
     if (isProtected !== undefined) sensor.isProtected = isProtected
+    if (topics !== undefined) sensor.topics = topics
 
     await sensor.save()
 
@@ -231,6 +234,10 @@ async function deleteSensor(ctx) {
     logger.error(error.message)
   }
 }
+
+
+
+
 
 async function validateSensorId(sensorId) {
   // Validate that sensorId is a valid ObjectId
@@ -335,11 +342,42 @@ async function createRecord(ctx) {
   }
 }
 
+async function publishMessage(ctx) {
+  try {
+    const { sensorId, topic, message } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
+    const sensor = await validateSensorId(sensorId)
+
+    if (!sensor) {
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'sensorNotFound',
+      )
+      return
+    }
+
+    console.log(111, topic, message)
+
+    ctx.body = {
+      code: 200,
+    }
+  } catch (error) {
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
+    logger.error(error.message)
+  }
+}
+
+
 module.exports = {
   getSensors,
   createSensor,
   updateSensor,
   deleteSensor,
+  publishMessage,
   getRecords,
   createRecord,
 }

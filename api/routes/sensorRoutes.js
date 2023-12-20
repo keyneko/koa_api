@@ -31,6 +31,13 @@ sensorRouter.delete(
   sensorController.deleteSensor,
 )
 
+// Publish a message to clinet
+sensorRouter.post(
+  '/sensor/publish',
+  authController.isAdmin,
+  sensorController.publishMessage,
+)
+
 // Get all records
 sensorRouter.get(
   '/sensor/records',

@@ -29,6 +29,10 @@ const sensorSchema = new mongoose.Schema({
   online: {
     type: Boolean,
   },
+  topics: {
+    type: [String],
+    default: [],
+  },
   translations: {
     type: mongoose.Schema.Types.Mixed,
     default: {},

@@ -1,10 +1,15 @@
 // mqttController.js
+const aedes = require('aedes')()
 const Sensor = require('../models/sensor')
 const SensorRecord = require('../models/sensorRecord')
 
-async function authenticateMqttClient(sensorId, apiKey, callback) {
+// Connected clients array
+let connectedClients = new Map()
+
+async function authenticateMqttClient(client, username, password, callback) {
   try {
-    // Check if the API Key is valid and map to a client ID
+    const sensorId = client.id
+    const apiKey = password.toString()
     const sensor = await Sensor.findById(sensorId)
 
     if (sensor && sensor.apiKey === apiKey) {
@@ -23,16 +28,14 @@ async function authenticateMqttClient(sensorId, apiKey, callback) {
 
 async function processMqttSensorData(client, packet) {
   try {
-    const sensorId = client.id // Assuming client.id is associated with sensorSchema's objectId
+    const sensorId = client.id
     const value = JSON.parse(packet.payload.toString())
 
-    // Create a new sensor record
     const sensorRecord = new SensorRecord({
       sensorId,
       value,
     })
 
-    // Save the sensor record to the database
     await sensorRecord.save()
 
     console.log(`Sensor data saved for sensor ${sensorId}`)
@@ -53,8 +56,71 @@ async function updateSensorOnlineStatus(sensorId, isOnline) {
   }
 }
 
+async function onClientConnected(client) {
+  console.log('Client connected:', client.id)
+
+  // Update the sensor's online field to true
+  await updateSensorOnlineStatus(client.id, true)
+
+  // Add the client to the connectedClients map
+  connectedClients.set(client.id, client)
+}
+
+async function onClientDisconnect(client) {
+  console.log('Client disconnected:', client.id)
+
+  // Update the sensor's online field to false
+  await updateSensorOnlineStatus(client.id, false)
+
+  // Remove the client from the connectedClients map
+  connectedClients.delete(client.id)
+}
+
+async function onSubscribe(subscriptions, client) {
+  console.log('Client subscribed to:', subscriptions)
+
+  // Respond to the client with the granted QoS
+  aedes.publish({
+    topic: '$SYS/' + client.id + '/granted',
+    payload: JSON.stringify(subscriptions),
+  })
+}
+
+async function onPublish(packet, client) {
+  // Process the status update
+  if (packet.topic === 'home/devices/status') {
+    console.log(
+      `Received from client ${client.id}: `,
+      packet.payload.toString(),
+    )
+    processMqttSensorData(client, packet)
+  }
+}
+
+// Function to publish a message to a client
+async function publishMessage(clientId, topic, value) {
+  const targetClient = connectedClients.get(clientId)
+
+  if (targetClient) {
+    aedes.publish({
+      topic: `${topic}/${clientId}`,
+      payload: JSON.stringify(value),
+      qos: 0,
+      retain: false,
+    })
+
+    console.log(`Published message to topic '${topic}' for client ${clientId}`)
+  } else {
+    console.log(`Client ${clientId} not found or not connected`)
+  }
+}
+
 module.exports = {
+  aedes,
   authenticateMqttClient,
-  processMqttSensorData,
-  updateSensorOnlineStatus,
+  onClientConnected,
+  onClientDisconnect,
+  onSubscribe,
+  onPublish,
+  publishMessage,
 }
