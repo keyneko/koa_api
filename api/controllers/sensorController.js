@@ -1,8 +1,9 @@
 const uuid = require('uuid')
 const mongoose = require('mongoose')
 const Sensor = require('../models/sensor')
-const SensorRecord = require('../models/sensorRecord')
+const SensorStatus = require('../models/sensorStatus')
 const authController = require('../controllers/authController')
+const mqttController = require('../controllers/mqttController')
 const { logger } = require('../utils/logger')
 const {
   getErrorMessage,
@@ -60,7 +61,7 @@ async function getSensors(ctx) {
       'status',
       'isProtected',
       'online',
-      'topics',
+      'subscriptions',
       'translations',
     ])
 
@@ -84,7 +85,7 @@ async function getSensors(ctx) {
 
 async function createSensor(ctx) {
   try {
-    const { name, number, type, isProtected, manufacturer, topics } = ctx.request.body
+    const { name, number, type, isProtected, manufacturer } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     // Generate a new API key using uuid
@@ -95,7 +96,6 @@ async function createSensor(ctx) {
       number,
       apiKey,
       isProtected,
-      topics,
     })
 
     // Handle translations based on language
@@ -128,7 +128,7 @@ async function createSensor(ctx) {
 
 async function updateSensor(ctx) {
   try {
-    const { _id, name, number, manufacturer, type, status, isProtected, topics } =
+    const { _id, name, number, manufacturer, type, status, isProtected } =
       ctx.request.body
     const language = ctx.cookies.get('language')
 
@@ -171,7 +171,6 @@ async function updateSensor(ctx) {
     if (number !== undefined) sensor.number = number
     if (status !== undefined) sensor.status = status
     if (isProtected !== undefined) sensor.isProtected = isProtected
-    if (topics !== undefined) sensor.topics = topics
 
     await sensor.save()
 
@@ -235,10 +234,6 @@ async function deleteSensor(ctx) {
   }
 }
 
-
-
-
-
 async function validateSensorId(sensorId) {
   // Validate that sensorId is a valid ObjectId
   if (!mongoose.Types.ObjectId.isValid(sensorId)) {
@@ -290,8 +285,8 @@ async function getRecords(ctx) {
       $lte: endTime,
     }
 
-    const records = await SensorRecord.find(query)
-      .select(['createdAt', 'value'])
+    const records = await SensorStatus.find(query)
+      .select(['createdAt', 'status'])
       .sort(sortOptions)
 
     ctx.status = 200
@@ -311,7 +306,7 @@ async function getRecords(ctx) {
 
 async function createRecord(ctx) {
   try {
-    const { sensorId, value } = ctx.request.body
+    const { sensorId, status } = ctx.request.body
     const language = ctx.cookies.get('language')
 
     if (!(await validateSensorId(sensorId))) {
@@ -324,13 +319,12 @@ async function createRecord(ctx) {
       return
     }
 
-    const newRecord = new SensorRecord({
-      createdAt: new Date(),
+    const newStatus = new SensorStatus({
       sensorId,
-      value,
+      status,
     })
 
-    await newRecord.save()
+    await newStatus.save()
 
     ctx.body = {
       code: 200,
@@ -344,10 +338,10 @@ async function createRecord(ctx) {
 
 async function publishMessage(ctx) {
   try {
-    const { sensorId, topic, message } = ctx.request.body
+    const { _id, qos, retain, topic, payload } = ctx.request.body
     const language = ctx.cookies.get('language')
 
-    const sensor = await validateSensorId(sensorId)
+    const sensor = await validateSensorId(_id)
 
     if (!sensor) {
       ctx.status = statusCodes.NotFound
@@ -359,7 +353,13 @@ async function publishMessage(ctx) {
       return
     }
 
-    console.log(111, topic, message)
+    // Push messages to client
+    mqttController.publish(_id, {
+      qos,
+      retain,
+      topic,
+      payload,
+    })
 
     ctx.body = {
       code: 200,
@@ -370,7 +370,6 @@ async function publishMessage(ctx) {
     logger.error(error.message)
   }
 }
-
 
 module.exports = {
   getSensors,

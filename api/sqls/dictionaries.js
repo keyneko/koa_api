@@ -240,12 +240,68 @@ async function insertSensorTypes() {
   }
 }
 
+// Inserting other miscellaneous dictionaries
+async function insertMiscellaneous() {
+  try {
+    const data = [
+      {
+        key: 'online',
+        value: 0,
+        name: '离线',
+        translations: {
+          en: 'Offline',
+          ja: 'オフライン',
+        },
+      },
+      {
+        key: 'online',
+        value: 1,
+        name: '在线',
+        translations: {
+          en: 'Online',
+          ja: 'オンライン',
+        },
+      },
+      {
+        key: 'yes_or_no',
+        value: 0,
+        name: '否',
+        translations: {
+          en: 'No',
+          ja: 'いいえ',
+        },
+      },
+      {
+        key: 'yes_or_no',
+        value: 1,
+        name: '是',
+        translations: {
+          en: 'Yes',
+          ja: 'はい',
+        },
+      },
+    ]
+
+    const promises = data.map((item) => {
+      const dictionary = new Dictionary(item)
+      return dictionary.save()
+    })
+
+    await Promise.all(promises)
+
+    logger.info('Sensor types dictionaries inserted successfully.')
+  } catch (error) {
+    logger.error('Error inserting sensor types dictionaries.')
+  }
+}
+
 function insertDictionaries() {
   // insertSops()
   insertStatus()
   insertBarcodeStatus()
   insertPositionStackable()
   insertSensorTypes()
+  insertMiscellaneous()
 }
 
 module.exports = { insertDictionaries }

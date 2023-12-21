@@ -1,6 +1,6 @@
 const {
   aedes,
-  authenticateMqttClient,
+  authenticate,
   onClientConnected,
   onClientDisconnect,
   onSubscribe,
@@ -11,7 +11,7 @@ const server = require('net').createServer(aedes.handle)
 const port = 1883
 
 // Authenticate clients based on API Key
-aedes.authenticate = authenticateMqttClient
+aedes.authenticate = authenticate
 
 // Handle client connect event
 aedes.on('client', onClientConnected)

@@ -1,12 +1,10 @@
 // mqttController.js
 const aedes = require('aedes')()
 const Sensor = require('../models/sensor')
-const SensorRecord = require('../models/sensorRecord')
+const SensorStatus = require('../models/sensorStatus')
+const MessageLog = require('../models/messageLog')
 
-// Connected clients array
-let connectedClients = new Map()
-
-async function authenticateMqttClient(client, username, password, callback) {
+async function authenticate(client, username, password, callback) {
   try {
     const sensorId = client.id
     const apiKey = password.toString()
@@ -15,9 +13,6 @@ async function authenticateMqttClient(client, username, password, callback) {
     if (sensor && sensor.apiKey === apiKey) {
       callback(null, true)
     } else {
-      console.info(
-        'MQTT authentication failed: Sensor not found or apiKey error',
-      )
       callback(null, false)
     }
   } catch (e) {
@@ -26,101 +21,126 @@ async function authenticateMqttClient(client, username, password, callback) {
   }
 }
 
-async function processMqttSensorData(client, packet) {
+async function processStatusData(client, packet) {
   try {
     const sensorId = client.id
-    const value = JSON.parse(packet.payload.toString())
+    const status = JSON.parse(packet.payload.toString())
 
-    const sensorRecord = new SensorRecord({
+    const sensorStatus = new SensorStatus({
       sensorId,
-      value,
+      status,
     })
+    await sensorStatus.save()
 
-    await sensorRecord.save()
-
-    console.log(`Sensor data saved for sensor ${sensorId}`)
+    console.log(`Status data saved for client ${sensorId}`)
   } catch (error) {
-    console.error('Error processing MQTT sensor data:', error)
+    console.error('Error processing MQTT client status data:', error)
   }
 }
 
-async function updateSensorOnlineStatus(sensorId, isOnline) {
+async function updateOnlineStatus(sensorId, isOnline) {
   try {
     // Update the Sensor model's online field
     await Sensor.findByIdAndUpdate(sensorId, { online: isOnline })
-    console.log(
-      `Sensor online status updated for sensor ${sensorId}: ${isOnline}`,
-    )
+    console.log(sensorId, isOnline ? 'online' : 'offline')
   } catch (error) {
     console.error('Error updating sensor online status:', error)
   }
 }
 
 async function onClientConnected(client) {
-  console.log('Client connected:', client.id)
-
-  // Update the sensor's online field to true
-  await updateSensorOnlineStatus(client.id, true)
-
-  // Add the client to the connectedClients map
-  connectedClients.set(client.id, client)
+  console.log('\nClient connected:', client.id)
+  await updateOnlineStatus(client.id, true)
 }
 
 async function onClientDisconnect(client) {
   console.log('Client disconnected:', client.id)
-
-  // Update the sensor's online field to false
-  await updateSensorOnlineStatus(client.id, false)
-
-  // Remove the client from the connectedClients map
-  connectedClients.delete(client.id)
+  await updateOnlineStatus(client.id, false)
 }
 
 async function onSubscribe(subscriptions, client) {
   console.log('Client subscribed to:', subscriptions)
 
-  // Respond to the client with the granted QoS
-  aedes.publish({
-    topic: '$SYS/' + client.id + '/granted',
-    payload: JSON.stringify(subscriptions),
-  })
+  try {
+    const sensor = await Sensor.findById(client.id)
+    if (!sensor) {
+      console.error('Sensor not found for client:', client.id)
+      return
+    }
+
+    // Update existing subscriptions or add new ones
+    subscriptions.forEach((newSub) => {
+      const existingSubIndex = sensor.subscriptions.findIndex(
+        (existingSub) => existingSub.topic === newSub.topic,
+      )
+
+      if (existingSubIndex !== -1) {
+        // Update existing subscription
+        sensor.subscriptions[existingSubIndex] = newSub
+      } else {
+        // Add new subscription
+        sensor.subscriptions.push(newSub)
+      }
+    })
+
+    sensor.markModified('subscriptions')
+    await sensor.save()
+
+    // Respond to the client with the granted QoS
+    aedes.publish({
+      topic: '$SYS/' + client.id + '/granted',
+      payload: JSON.stringify(subscriptions),
+    })
+  } catch (error) {
+    console.error('Error handling subscribe:', error)
+  }
 }
 
 async function onPublish(packet, client) {
-  // Process the status update
-  if (packet.topic === 'home/devices/status') {
+  const topic = packet.topic
+  console.log(`Received topic ${topic}`)
+
+  if (client != null || client != undefined) {
     console.log(
       `Received from client ${client.id}: `,
       packet.payload.toString(),
     )
-    processMqttSensorData(client, packet)
+
+    // Receive dht11 sensor status data
+    if (topic.startsWith('dht11/status')) {
+      processStatusData(client, packet)
+    }
   }
 }
 
-// Function to publish a message to a client
-async function publishMessage(clientId, topic, value) {
-  const targetClient = connectedClients.get(clientId)
-
-  if (targetClient) {
+async function publish(sensorId, packet) {
+  try {
+    // Publish a message to a client
     aedes.publish({
-      topic: `${topic}/${clientId}`,
-      payload: JSON.stringify(value),
       qos: 0,
       retain: false,
+      ...packet,
     })
 
-    console.log(`Published message to topic '${topic}' for client ${clientId}`)
-  } else {
-    console.log(`Client ${clientId} not found or not connected`)
+    const messageLog = new MessageLog({
+      sensorId,
+      topic: packet.topic,
+      payload: packet.payload,
+    })
+    await messageLog.save()
+
+    console.log(`Message log saved for client ${sensorId}`)
+  } catch (error) {
+    console.error('Error processing save message log:', error)
   }
 }
 
 module.exports = {
   aedes,
-  authenticateMqttClient,
+  authenticate,
   onClientConnected,
   onClientDisconnect,
   onSubscribe,
   onPublish,
-  publishMessage,
+  publish,
 }
