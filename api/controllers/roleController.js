@@ -56,13 +56,13 @@ async function createRole(ctx) {
     const language = ctx.cookies.get('language')
 
     const newRole = new Role({
+      name,
       value,
       isProtected,
     })
 
     // Handle translations based on the language value
     if (language === 'zh' || language === undefined) {
-      newRole.name = name
     } else {
       newRole.translations = newRole.translations || new Map()
       newRole.translations.set(language, name)

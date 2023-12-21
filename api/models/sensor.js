@@ -13,9 +13,6 @@ const sensorSchema = new mongoose.Schema({
   manufacturer: {
     type: String,
   },
-  isProtected: {
-    type: Boolean,
-  },
   apiKey: {
     type: String,
     unique: true,
@@ -28,6 +25,11 @@ const sensorSchema = new mongoose.Schema({
   },
   online: {
     type: Boolean,
+    default: false,
+  },
+  isProtected: {
+    type: Boolean,
+    default: false,
   },
   subscriptions: {
     type: mongoose.Schema.Types.Mixed,

@@ -92,6 +92,8 @@ async function createSensor(ctx) {
     const apiKey = uuid.v4()
 
     const newSensor = new Sensor({
+      name,
+      manufacturer,
       type,
       number,
       apiKey,
@@ -100,8 +102,6 @@ async function createSensor(ctx) {
 
     // Handle translations based on language
     if (language === 'zh' || language === undefined) {
-      newSensor.name = name
-      newSensor.manufacturer = manufacturer
     } else {
       // Use $set to add translations
       newSensor.$set('translations', {

@@ -169,6 +169,7 @@ async function createPosition(ctx) {
     const value = await generatePosition(areaCode, buildingCode, floorCode)
 
     const newPosition = new Position({
+      name,
       value,
       status,
       isStackable,
@@ -177,7 +178,6 @@ async function createPosition(ctx) {
 
     // Handle translations based on the language value
     if (language === 'zh' || language === undefined) {
-      newPosition.name = name
     } else {
       // Use $set to add translations
       newPosition.$set('translations', {
@@ -234,8 +234,7 @@ async function updatePosition(ctx) {
     // Mark the modified fields to ensure they are saved
     position.markModified('translations')
 
-    if (updateData.status !== undefined)
-      position.status = updateData.status
+    if (updateData.status !== undefined) position.status = updateData.status
     if (updateData.isStackable !== undefined)
       position.isStackable = updateData.isStackable
     position.files = updateData.files || position.files

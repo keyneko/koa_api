@@ -173,6 +173,8 @@ async function createBarcode(ctx) {
 
     const value = await generateBarcode(category)
     const newBarcode = new Barcode({
+      name,
+      basicUnit,
       value,
       quantity,
       status,
@@ -181,8 +183,6 @@ async function createBarcode(ctx) {
 
     // Handle translations based on the language value
     if (language === 'zh' || language === undefined) {
-      newBarcode.name = name
-      newBarcode.basicUnit = basicUnit
     } else {
       // Use $set to add translations
       newBarcode.$set('translations', {
