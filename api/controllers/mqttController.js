@@ -3,6 +3,7 @@ const aedes = require('aedes')()
 const Sensor = require('../models/sensor')
 const SensorStatus = require('../models/sensorStatus')
 const MessageLog = require('../models/messageLog')
+const { mqtt: logger } = require('../utils/logger')
 
 async function authenticate(client, username, password, callback) {
   try {
@@ -13,11 +14,14 @@ async function authenticate(client, username, password, callback) {
     if (sensor && sensor.apiKey === apiKey) {
       callback(null, true)
     } else {
+      logger.info(
+        'MQTT authentication failed: Sensor not found or apiKey error',
+      )
       callback(null, false)
     }
-  } catch (e) {
-    console.error(e.message)
-    callback(e, false)
+  } catch (error) {
+    callback(error, false)
+    logger.error(error.message)
   }
 }
 
@@ -32,9 +36,10 @@ async function processStatusData(client, packet) {
     })
     await sensorStatus.save()
 
-    console.log(`Status data saved for client ${sensorId}`)
+    logger.info(`Status data saved for client ${sensorId}`)
   } catch (error) {
-    console.error('Error processing MQTT client status data:', error)
+    logger.error('Error processing MQTT client status data: ')
+    logger.error(error.message)
   }
 }
 
@@ -42,29 +47,31 @@ async function updateOnlineStatus(sensorId, isOnline) {
   try {
     // Update the Sensor model's online field
     await Sensor.findByIdAndUpdate(sensorId, { online: isOnline })
-    console.log(sensorId, isOnline ? 'online' : 'offline')
+    logger.info(sensorId, isOnline ? 'online' : 'offline')
   } catch (error) {
-    console.error('Error updating sensor online status:', error)
+    logger.error('Error updating sensor online status: ')
+    logger.error(error.message)
   }
 }
 
 async function onClientConnected(client) {
-  console.log('\nClient connected:', client.id)
+  logger.info('\n\nClient connected: ' + client.id)
   await updateOnlineStatus(client.id, true)
 }
 
 async function onClientDisconnect(client) {
-  console.log('Client disconnected:', client.id)
+  logger.info('Client disconnected: ' + client.id)
   await updateOnlineStatus(client.id, false)
 }
 
 async function onSubscribe(subscriptions, client) {
-  console.log('Client subscribed to:', subscriptions)
+  logger.info('Client subscribed to: ')
+  logger.info(JSON.stringify(subscriptions))
 
   try {
     const sensor = await Sensor.findById(client.id)
     if (!sensor) {
-      console.error('Sensor not found for client:', client.id)
+      logger.error('Sensor not found for client: ' + client.id)
       return
     }
 
@@ -92,19 +99,18 @@ async function onSubscribe(subscriptions, client) {
       payload: JSON.stringify(subscriptions),
     })
   } catch (error) {
-    console.error('Error handling subscribe:', error)
+    logger.error('Error handling subscribe: ')
+    logger.error(error.message)
   }
 }
 
 async function onPublish(packet, client) {
   const topic = packet.topic
-  console.log(`Received topic ${topic}`)
+  logger.info(`Received topic ${topic}`)
 
   if (client != null || client != undefined) {
-    console.log(
-      `Received from client ${client.id}: `,
-      packet.payload.toString(),
-    )
+    logger.info(`Received from client ${client.id}: `)
+    logger.info(packet.payload.toString())
 
     // Receive dht11 sensor status data
     if (topic.startsWith('dht11/status')) {
@@ -129,9 +135,10 @@ async function publish(sensorId, packet) {
     })
     await messageLog.save()
 
-    console.log(`Message log saved for client ${sensorId}`)
+    logger.info(`Message log saved for client ${sensorId}`)
   } catch (error) {
-    console.error('Error processing save message log:', error)
+    logger.error('Error processing save message log: ')
+    logger.error(error.message)
   }
 }
 
