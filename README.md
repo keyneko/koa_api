@@ -54,11 +54,46 @@ sudo chown -R mongodb:mongodb /var/lib/mongodb
 sudo chmod 700 /var/lib/mongodb
 mongod --version
 mongosh "mongodb://localhost:27017/test"
+```
+```tcl
+# mongod.conf
+
+# network interfaces
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+  
+security: 
+  authorization: enabled
+```
+```javascript
+// 开户身份验证
+use admin
+db.createUser({
+  user: "admin",
+  pwd: "JTewp9ZKKAag22u",
+  roles: [
+    { role: "root", db: "admin" }
+  ]
+})
+
+db.auth("admin", "JTewp9ZKKAag22u")
+
+use test
+db.createUser({
+  user: "test",
+  pwd: "f3WmQEB-LYm28xw",
+  roles: [
+    { role: "readWrite", db: "test" }
+  ]
+})
+
+db.auth("test", "f3WmQEB-LYm28xw")
+
+// 查表
 show collections
 db.roles.drop()
 db.users.drop()
-```
-```javascript
 db.users.find()
 db.users.find({ name: "John Doe" })
 ```
@@ -68,6 +103,12 @@ db.users.find({ name: "John Doe" })
 ps aux | grep 'npm run start:prod'
 sudo lsof -i :27017
 sudo kill -9 10303
+
+# 重启mongod失败
+sudo cat /var/log/mongodb/mongod.log
+rm /var/lib/mongodb/mongod.lock
+rm /tmp/mongodb-27017.sock
+sudo systemctl start mongod
 ```
 
 # 安装nginx
