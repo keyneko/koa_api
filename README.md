@@ -55,6 +55,12 @@ sudo chmod 700 /var/lib/mongodb
 mongod --version
 mongosh "mongodb://localhost:27017/test"
 ```
+```tcl
+# mongod.conf
+
+security: 
+  authorization: enabled
+```
 ```javascript
 // 开户身份验证
 use admin
