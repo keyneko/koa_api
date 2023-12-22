@@ -23,7 +23,7 @@ dotenv.config({ path: envFile })
 
 const app = new Koa()
 const PORT = process.env.PORT || 4000
-const MONGODB_URI = `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/test`
+const MONGODB_URI = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
@@ -44,8 +44,8 @@ app.use(
       // Whether to keep the extension
       keepExtensions: true,
       // Limit upload file size
-      maxFieldsSize: 5 * 1024 * 1024,
-    },
+      maxFileSize: 5 * 1024 * 1024,
+    }
   }),
 )
 
