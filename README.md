@@ -58,6 +58,11 @@ mongosh "mongodb://localhost:27017/test"
 ```tcl
 # mongod.conf
 
+# network interfaces
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+  
 security: 
   authorization: enabled
 ```
