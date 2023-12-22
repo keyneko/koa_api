@@ -312,6 +312,7 @@ module.exports = {
   login,
   logout,
   generateToken,
+  verifyToken,
   hasToken,
   isAdmin,
   hasApiKey,

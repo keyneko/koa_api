@@ -23,6 +23,7 @@
     "mongoose": "^7.6.5",
     "mqtt": "^5.3.3",
     "node-rsa": "^1.1.1",
+    "socket.io": "^4.7.2",
     "svg-captcha": "^1.4.0",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",

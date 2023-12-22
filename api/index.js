@@ -1,10 +1,12 @@
-const path = require('path')
 const Koa = require('koa')
+const path = require('path')
+const http = require('http')
 const dotenv = require('dotenv')
 const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
 const compress = require('koa-compress')
 const mongoose = require('mongoose')
+const { initializeSocket } = require('./utils/socket')
 const requestRateLimit = require('./utils/requestRateLimitMiddleware')
 const logRoutes = require('./routes/logRoutes')
 const authRoutes = require('./routes/authRoutes')
@@ -23,10 +25,11 @@ const envFile =
 dotenv.config({ path: envFile })
 
 const app = new Koa()
-const PORT = process.env.PORT || 4000
-const MONGODB_URI = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`
+const server = http.createServer(app.callback())
+const io = initializeSocket(server)
 
 // Connect to MongoDB
+const MONGODB_URI = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -69,6 +72,7 @@ require('./sqls')
 require('./utils/mqttServer')
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
+const PORT = process.env.PORT || 4000
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })
