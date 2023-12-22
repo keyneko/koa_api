@@ -6,11 +6,7 @@ const Sensor = require('../models/sensor')
 const TokenBlacklist = require('../models/tokenBlacklist')
 const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 const secretKey = 'your-secret-key'
 

@@ -5,11 +5,7 @@ const Permission = require('../models/permission')
 const authController = require('../controllers/authController')
 const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 async function getUsers(ctx) {
   try {

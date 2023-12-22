@@ -6,11 +6,7 @@ const MessageLog = require('../models/messageLog')
 const authController = require('../controllers/authController')
 const mqttController = require('../controllers/mqttController')
 const { logger } = require('../utils/logger')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 async function getSensors(ctx) {
   try {

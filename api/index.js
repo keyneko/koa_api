@@ -5,6 +5,7 @@ const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
 const compress = require('koa-compress')
 const mongoose = require('mongoose')
+const requestRateLimit = require('./utils/requestRateLimitMiddleware')
 const logRoutes = require('./routes/logRoutes')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
@@ -44,10 +45,13 @@ app.use(
       // Whether to keep the extension
       keepExtensions: true,
       // Limit upload file size
-      maxFileSize: 5 * 1024 * 1024,
-    }
+      maxFileSize: 10 * 1024 * 1024,
+    },
   }),
 )
+
+// Using request frequency limiting middleware
+app.use(requestRateLimit)
 
 // Set routes
 app.use(logRoutes.routes())

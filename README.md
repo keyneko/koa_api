@@ -67,7 +67,7 @@ security:
   authorization: enabled
 ```
 ```javascript
-// 开户身份验证
+// 开启身份验证
 use admin
 db.createUser({
   user: "admin",

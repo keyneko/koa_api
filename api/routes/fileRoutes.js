@@ -4,11 +4,7 @@ const Router = require('koa-router')
 const fileRouter = new Router()
 const authController = require('../controllers/authController')
 const { logger } = require('../utils/logger')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 const projectRoot = process.cwd()
 

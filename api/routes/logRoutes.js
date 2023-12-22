@@ -2,11 +2,7 @@ const Router = require('koa-router')
 const logRouter = new Router()
 const authController = require('../controllers/authController')
 const { frontend, logger } = require('../utils/logger')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 // Upload file
 logRouter.post('/log', authController.hasToken, async (ctx) => {

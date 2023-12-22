@@ -49,7 +49,7 @@ const mqtt = winston.createLogger({
 // Add a console transport for logging to the console during development
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({ format }))
-  mqtt.add(new winston.transports.Console({ format }))
+  // mqtt.add(new winston.transports.Console({ format }))
 }
 
 // Log system startup information

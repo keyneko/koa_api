@@ -1,10 +1,6 @@
 const Barcode = require('../models/barcode')
 const { logger } = require('../utils/logger')
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 // Generate barcode
 async function generateBarcode(categoryCode) {

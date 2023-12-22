@@ -11,6 +11,7 @@ const statusCodes = {
   Unauthorized: 401,
   Forbidden: 403,
   NotFound: 404,
+  TooManyRequests: 429,
   InternalServerError: 500,
   InvalidCaptcha: 501,
   UserExists: 502,
@@ -112,6 +113,20 @@ const statusMessages = {
         dictionariesNotFound: '辞書が見つからない',
         sensorNotFound: 'センサーが見つからない',
         permissionNotFound: 'パーミッションエントリが見つからない',
+      },
+    },
+  },
+
+  [statusCodes.TooManyRequests]: {
+    messages: {
+      default: '短时间内请求过多',
+    },
+    translations: {
+      en: {
+        default: 'Too many requests within a short time',
+      },
+      ja: {
+        default: '短期間にリクエストが多すぎます',
       },
     },
   },
