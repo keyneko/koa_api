@@ -54,11 +54,35 @@ sudo chown -R mongodb:mongodb /var/lib/mongodb
 sudo chmod 700 /var/lib/mongodb
 mongod --version
 mongosh "mongodb://localhost:27017/test"
+```
+```javascript
+// 开户身份验证
+use admin
+db.createUser({
+  user: "admin",
+  pwd: "JTewp9ZKKAag22u",
+  roles: [
+    { role: "root", db: "admin" }
+  ]
+})
+
+db.auth("admin", "JTewp9ZKKAag22u")
+
+use test
+db.createUser({
+  user: "test",
+  pwd: "f3WmQEB-LYm28xw",
+  roles: [
+    { role: "readWrite", db: "test" }
+  ]
+})
+
+db.auth("test", "f3WmQEB-LYm28xw")
+
+// 查表
 show collections
 db.roles.drop()
 db.users.drop()
-```
-```javascript
 db.users.find()
 db.users.find({ name: "John Doe" })
 ```
