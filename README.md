@@ -98,6 +98,12 @@ db.users.find({ name: "John Doe" })
 ps aux | grep 'npm run start:prod'
 sudo lsof -i :27017
 sudo kill -9 10303
+
+# 重启mongod失败
+sudo cat /var/log/mongodb/mongod.log
+rm /var/lib/mongodb/mongod.lock
+rm /tmp/mongodb-27017.sock
+sudo systemctl start mongod
 ```
 
 # 安装nginx
