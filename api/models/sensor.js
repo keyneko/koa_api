@@ -23,7 +23,7 @@ const sensorSchema = new mongoose.Schema({
     enum: [0, 1],
     default: 1,
   },
-  online: {
+  isOnline: {
     type: Boolean,
     default: false,
   },

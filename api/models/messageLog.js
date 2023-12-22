@@ -16,6 +16,8 @@ const messageLogSchema = new mongoose.Schema({
   payload: {
     type: mongoose.Schema.Types.Mixed,
   },
+  qos: Number,
+  isOnline: Boolean,
 })
 
 const MessageLog = mongoose.model('MessageLog', messageLogSchema)

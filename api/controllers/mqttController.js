@@ -2,7 +2,6 @@
 const aedes = require('aedes')()
 const Sensor = require('../models/sensor')
 const SensorStatus = require('../models/sensorStatus')
-const MessageLog = require('../models/messageLog')
 const { mqtt: logger } = require('../utils/logger')
 
 async function authenticate(client, username, password, callback) {
@@ -17,7 +16,14 @@ async function authenticate(client, username, password, callback) {
       logger.info(
         'MQTT authentication failed: Sensor not found or apiKey error',
       )
-      callback(null, false)
+
+      callback(
+        {
+          returnCode: 4,
+          returnMessage: 'Authentication failed',
+        },
+        false,
+      )
     }
   } catch (error) {
     callback(error, false)
@@ -45,8 +51,8 @@ async function processStatusData(client, packet) {
 
 async function updateOnlineStatus(sensorId, isOnline) {
   try {
-    // Update the Sensor model's online field
-    await Sensor.findByIdAndUpdate(sensorId, { online: isOnline })
+    // Update the Sensor model's isOnline field
+    await Sensor.findByIdAndUpdate(sensorId, { isOnline })
     logger.info(sensorId, isOnline ? 'online' : 'offline')
   } catch (error) {
     logger.error('Error updating sensor online status: ')
@@ -87,10 +93,10 @@ async function onSubscribe(subscriptions, client) {
       } else {
         // Add new subscription
         sensor.subscriptions.push(newSub)
+        sensor.markModified('subscriptions')
       }
     })
 
-    sensor.markModified('subscriptions')
     await sensor.save()
 
     // Respond to the client with the granted QoS
@@ -100,6 +106,37 @@ async function onSubscribe(subscriptions, client) {
     })
   } catch (error) {
     logger.error('Error handling subscribe: ')
+    logger.error(error.message)
+  }
+}
+
+async function onUnsubscribe(subscriptions, client) {
+  logger.info('Client unsubscribed to: ')
+  logger.info(JSON.stringify(subscriptions))
+
+  try {
+    const sensor = await Sensor.findById(client.id)
+    if (!sensor) {
+      logger.error('Sensor not found for client: ' + client.id)
+      return
+    }
+
+    // Remove subscriptions
+    subscriptions.forEach((unsubscribeTopic) => {
+      const existingSubIndex = sensor.subscriptions.findIndex(
+        (existingSub) => existingSub.topic === unsubscribeTopic,
+      )
+
+      if (existingSubIndex !== -1) {
+        // Remove existing subscription
+        sensor.subscriptions.splice(existingSubIndex, 1)
+        sensor.markModified('subscriptions')
+      }
+    })
+
+    await sensor.save()
+  } catch (error) {
+    logger.error('Error handling unsubscribe: ')
     logger.error(error.message)
   }
 }
@@ -127,17 +164,8 @@ async function publish(sensorId, packet) {
       retain: false,
       ...packet,
     })
-
-    const messageLog = new MessageLog({
-      sensorId,
-      topic: packet.topic,
-      payload: packet.payload,
-    })
-    await messageLog.save()
-
-    logger.info(`Message log saved for client ${sensorId}`)
   } catch (error) {
-    logger.error('Error processing save message log: ')
+    logger.error('Error publish data to client: ')
     logger.error(error.message)
   }
 }
@@ -148,6 +176,7 @@ module.exports = {
   onClientConnected,
   onClientDisconnect,
   onSubscribe,
+  onUnsubscribe,
   onPublish,
   publish,
 }

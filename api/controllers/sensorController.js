@@ -2,6 +2,7 @@ const uuid = require('uuid')
 const mongoose = require('mongoose')
 const Sensor = require('../models/sensor')
 const SensorStatus = require('../models/sensorStatus')
+const MessageLog = require('../models/messageLog')
 const authController = require('../controllers/authController')
 const mqttController = require('../controllers/mqttController')
 const { logger } = require('../utils/logger')
@@ -60,7 +61,7 @@ async function getSensors(ctx) {
       'apiKey',
       'status',
       'isProtected',
-      'online',
+      'isOnline',
       'subscriptions',
       'translations',
     ])
@@ -360,6 +361,17 @@ async function publishMessage(ctx) {
       topic,
       payload,
     })
+
+    const messageLog = new MessageLog({
+      sensorId: _id,
+      topic,
+      payload,
+      qos,
+      isOnline: sensor.isOnline,
+    })
+
+    await messageLog.save()
+    logger.info(`Message log saved for client ${_id}`)
 
     ctx.body = {
       code: 200,

@@ -4,6 +4,7 @@ const {
   onClientConnected,
   onClientDisconnect,
   onSubscribe,
+  onUnsubscribe,
   onPublish,
 } = require('../controllers/mqttController')
 const server = require('net').createServer(aedes.handle)
@@ -21,6 +22,9 @@ aedes.on('clientDisconnect', onClientDisconnect)
 
 // Handle client subscribe event
 aedes.on('subscribe', onSubscribe)
+
+// Handle client unsubscription event
+aedes.on('unsubscribe', onUnsubscribe)
 
 // Handle client publish event
 aedes.on('publish', onPublish)
