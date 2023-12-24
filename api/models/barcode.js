@@ -28,6 +28,9 @@ const barcodeSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  isProtected: {
+    type: Boolean,
+  },
   files: {
     type: [String],
     default: [],

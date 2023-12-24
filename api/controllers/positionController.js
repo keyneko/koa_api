@@ -74,8 +74,9 @@ async function getPositions(ctx) {
         .select([
           'value',
           'name',
-          'status',
           'isStackable',
+          'status',
+          'isProtected',
           'files',
           'translations',
         ])
@@ -87,12 +88,8 @@ async function getPositions(ctx) {
 
     // Map over the positions to retrieve translated values
     const mappedPositions = positions.map((position) => ({
-      _id: position._id,
-      value: position.value,
+      ...position.toObject(),
       name: position.translations?.name?.[language] || position.name,
-      status: position.status,
-      isStackable: position.isStackable,
-      files: position.files,
     }))
 
     ctx.status = 200
@@ -113,16 +110,17 @@ async function getPosition(ctx) {
     const { value } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const result = await Position.findOne({ value }).select([
+    const position = await Position.findOne({ value }).select([
       'value',
       'name',
-      'status',
       'isStackable',
+      'status',
+      'isProtected',
       'files',
       'translations',
     ])
 
-    if (!result) {
+    if (!position) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -134,12 +132,8 @@ async function getPosition(ctx) {
     ctx.body = {
       code: 200,
       data: {
-        _id: result._id,
-        value: result.value,
-        name: result.translations?.name?.[language] || result.name,
-        isStackable: result.isStackable,
-        status: result.status,
-        files: result.files,
+        ...position.toObject(),
+        name: position.translations?.name?.[language] || position.name,
       },
     }
   } catch (error) {
@@ -198,7 +192,7 @@ async function createPosition(ctx) {
 
 async function updatePosition(ctx) {
   try {
-    const { value } = ctx.request.body
+    const { value, isProtected } = ctx.request.body
     const updateData = { ...ctx.request.body }
     const language = ctx.cookies.get('language')
 
@@ -234,6 +228,7 @@ async function updatePosition(ctx) {
     if (updateData.isStackable !== undefined)
       position.isStackable = updateData.isStackable
     position.files = updateData.files || position.files
+    if (isProtected !== undefined) position.isProtected = isProtected
 
     await position.save()
 
@@ -252,8 +247,8 @@ async function deletePosition(ctx) {
     const { value } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const result = await Position.findOneAndDelete({ value })
-    if (!result) {
+    const position = await Position.findOne({ value })
+    if (!position) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -262,6 +257,19 @@ async function deletePosition(ctx) {
       )
       return
     }
+
+    // Check if it is protected
+    if (position.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedPosition',
+      )
+      return
+    }
+
+    await Position.findOneAndDelete({ value })
 
     ctx.body = {
       code: 200,

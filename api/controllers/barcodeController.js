@@ -76,6 +76,7 @@ async function getBarcodes(ctx) {
           'quantity',
           'basicUnit',
           'status',
+          'isProtected',
           'files',
           'translations',
         ])
@@ -87,14 +88,10 @@ async function getBarcodes(ctx) {
 
     // Map over the barcodes to retrieve translated values
     const mappedBarcodes = barcodes.map((barcode) => ({
-      _id: barcode._id,
-      value: barcode.value,
+      ...barcode.toObject(),
       name: barcode.translations?.name?.[language] || barcode.name,
-      quantity: barcode.quantity,
       basicUnit:
         barcode.translations?.basicUnit?.[language] || barcode.basicUnit,
-      status: barcode.status,
-      files: barcode.files,
     }))
 
     ctx.status = 200
@@ -115,17 +112,18 @@ async function getBarcode(ctx) {
     const { value } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const result = await Barcode.findOne({ value }).select([
+    const barcode = await Barcode.findOne({ value }).select([
       'value',
       'name',
       'quantity',
       'basicUnit',
       'status',
+      'isProtected',
       'files',
       'translations',
     ])
 
-    if (!result) {
+    if (!barcode) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -138,14 +136,10 @@ async function getBarcode(ctx) {
     ctx.body = {
       code: 200,
       data: {
-        _id: result._id,
-        value: result.value,
-        name: result.translations?.name?.[language] || result.name,
-        quantity: result.quantity,
+        ...barcode.toObject(),
+        name: barcode.translations?.name?.[language] || barcode.name,
         basicUnit:
-          result.translations?.basicUnit?.[language] || result.basicUnit,
-        status: result.status,
-        files: result.files,
+          barcode.translations?.basicUnit?.[language] || barcode.basicUnit,
       },
     }
   } catch (error) {
@@ -206,7 +200,7 @@ async function createBarcode(ctx) {
 
 async function updateBarcode(ctx) {
   try {
-    const { value } = ctx.request.body
+    const { value, isProtected } = ctx.request.body
     const updateData = { ...ctx.request.body }
     const language = ctx.cookies.get('language')
 
@@ -249,6 +243,7 @@ async function updateBarcode(ctx) {
     barcode.quantity = updateData.quantity || barcode.quantity
     barcode.status = updateData.status || barcode.status
     barcode.files = updateData.files || barcode.files
+    if (isProtected !== undefined) barcode.isProtected = isProtected
 
     await barcode.save()
 
@@ -267,8 +262,8 @@ async function deleteBarcode(ctx) {
     const { value } = ctx.query
     const language = ctx.cookies.get('language')
 
-    const result = await Barcode.findOneAndDelete({ value })
-    if (!result) {
+    const barcode = await Barcode.findOne({ value })
+    if (!barcode) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
@@ -277,6 +272,19 @@ async function deleteBarcode(ctx) {
       )
       return
     }
+
+    // Check if it is protected
+    if (barcode.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedBarcode',
+      )
+      return
+    }
+
+    await Barcode.findOneAndDelete({ value })
 
     ctx.body = {
       code: 200,

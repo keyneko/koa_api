@@ -8,7 +8,7 @@ const { logger } = require('../utils/logger')
 const { decryptPassword } = require('../utils/rsa')
 const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
-const secretKey = 'your-secret-key'
+const secretKey = 'your-secret-key-1qaz2wsx'
 
 // Store captcha code and corresponding captcha code ID
 const captchaStore = {}
@@ -134,17 +134,27 @@ const hasApiKey = async (ctx, next) => {
     if (apikey) {
       const sensor = await Sensor.findById(sensorId)
 
-      if (sensor && sensor.apiKey === apikey) {
-        // API key is valid and sensor is active, proceed to the next middleware or route
-        await next()
-      } else {
+      if (!sensor) {
+        ctx.status = statusCodes.Forbidden
+        ctx.body = getErrorMessage(
+          statusCodes.Forbidden,
+          language,
+          'protectedSensor',
+        )
+        return
+      }
+
+      if (sensor.apiKey !== apikey) {
         ctx.status = statusCodes.Unauthorized
         ctx.body = getErrorMessage(
           statusCodes.Unauthorized,
           language,
           'invalidApiKey',
         )
+        return
       }
+
+      await next()
     } else {
       ctx.status = statusCodes.Unauthorized
       ctx.body = getErrorMessage(

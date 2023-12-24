@@ -12,17 +12,20 @@ const positionSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  // Flag indicating whether multiple items can be stacked in the same position: 0 (not allowed), 1 (allowed)
+  isStackable: {
+    type: Number,
+    enum: [0, 1],
+    default: 0,
+  },
   // Status: 0 (invalid), 1 (valid)
   status: {
     type: Number,
     enum: [0, 1],
     default: 1,
   },
-  // Flag indicating whether multiple items can be stacked in the same position: 0 (not allowed), 1 (allowed)
-  isStackable: {
-    type: Number,
-    enum: [0, 1],
-    default: 0,
+  isProtected: {
+    type: Boolean,
   },
   options: {
     type: Object,

@@ -62,6 +62,9 @@ async function getSensors(ctx) {
       'translations',
     ])
 
+    const decoded = ctx.state.decoded
+    const isAdmin = (decoded.roles || []).some((role) => role.isAdmin)
+
     ctx.status = 200
     ctx.body = {
       code: 200,
@@ -71,6 +74,7 @@ async function getSensors(ctx) {
         manufacturer:
           sensor.translations?.manufacturer?.[language] || sensor.manufacturer,
         translations: undefined,
+        apiKey: isAdmin ? sensor.apiKey : undefined,
       })),
     }
   } catch (error) {

@@ -1,9 +1,5 @@
 // requestRateLimitMiddleware.js
-const {
-  getErrorMessage,
-  statusCodes,
-  statusMessages,
-} = require('../utils/statusCodes')
+const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 // Store the timestamp of the last request
 const lastRequestTimestamps = new Map()

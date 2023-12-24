@@ -18,6 +18,9 @@ const dictionarySchema = new mongoose.Schema({
     enum: [0, 1],
     default: 1,
   },
+  isProtected: {
+    type: Boolean,
+  },
   translations: {
     type: Map, // Map type for storing translations
     of: String, // String values for translations

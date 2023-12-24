@@ -61,12 +61,12 @@ async function insertPermissions() {
         },
       },
       {
-        name: '条码生成',
-        pattern: 'barcodes:create:*',
+        name: '条码查询',
+        pattern: 'barcodes:query:*',
         translations: {
           name: {
-            en: 'Barcode Generate',
-            ja: 'バーコード生成',
+            en: 'Barcodes Query',
+            ja: 'バーコードクエリー',
           },
         },
       },
@@ -77,6 +77,36 @@ async function insertPermissions() {
           name: {
             en: 'Barcodes Management',
             ja: 'バーコード管理',
+          },
+        },
+      },
+      {
+        name: '条码生成',
+        pattern: 'barcodes:management:create',
+        translations: {
+          name: {
+            en: 'Barcode Generate',
+            ja: 'バーコード生成',
+          },
+        },
+      },
+      {
+        name: '条码删除',
+        pattern: 'barcodes:management:delete',
+        translations: {
+          name: {
+            en: 'Barcode Delete',
+            ja: 'バーコード削除',
+          },
+        },
+      },
+      {
+        name: '条码更新',
+        pattern: 'barcodes:management:update',
+        translations: {
+          name: {
+            en: 'Barcode Update',
+            ja: 'バーコード更新',
           },
         },
       },
@@ -93,12 +123,12 @@ async function insertPermissions() {
         },
       },
       {
-        name: '库位码生成',
-        pattern: 'positions:create:*',
+        name: '库位码查询',
+        pattern: 'positions:query:*',
         translations: {
           name: {
-            en: 'Position Generate',
-            ja: 'ポジションコード生成',
+            en: 'Positions Query',
+            ja: 'ポジションコードクエリー',
           },
         },
       },
@@ -109,6 +139,36 @@ async function insertPermissions() {
           name: {
             en: 'Positions Management',
             ja: 'ポジションコード管理',
+          },
+        },
+      },
+      {
+        name: '库位码生成',
+        pattern: 'positions:management:create',
+        translations: {
+          name: {
+            en: 'Position Generate',
+            ja: 'ポジションコード生成',
+          },
+        },
+      },
+      {
+        name: '库位码删除',
+        pattern: 'positions:management:delete',
+        translations: {
+          name: {
+            en: 'Position Delete',
+            ja: 'ポジションコード削除',
+          },
+        },
+      },
+      {
+        name: '库位码更新',
+        pattern: 'positions:management:update',
+        translations: {
+          name: {
+            en: 'Position Update',
+            ja: 'ポジションコード更新',
           },
         },
       },

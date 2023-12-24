@@ -8,6 +8,7 @@ const {
   onPublish,
 } = require('../controllers/mqttController')
 const server = require('net').createServer(aedes.handle)
+const { mqtt: logger } = require('../utils/logger')
 
 const port = 1883
 
@@ -30,5 +31,5 @@ aedes.on('unsubscribe', onUnsubscribe)
 aedes.on('publish', onPublish)
 
 server.listen(port, () => {
-  console.log('MQTT server listening on port', port)
+  logger.info('MQTT server listening on port', port)
 })
