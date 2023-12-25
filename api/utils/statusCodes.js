@@ -3,7 +3,11 @@
 function getErrorMessage(errorCode, language, messageKey = 'default') {
   const errorCategory = statusMessages[errorCode]
   const messages = errorCategory.translations?.[language]
-  return messages?.[messageKey] || errorCategory.messages[messageKey]
+  return (
+    messages?.[messageKey] ||
+    errorCategory.messages[messageKey] ||
+    errorCategory.messages.default
+  )
 }
 
 // Enum status codes
@@ -53,6 +57,7 @@ const statusMessages = {
       adminOnly: '禁止操作：仅限管理员',
       cannotDeleteAdmin: '禁止操作：无法删除管理员角色',
       protectedPermission: '禁止操作：无法删除受保护的权限词条',
+      protectedDictionary: '禁止操作：无法删除受保护的字典词条',
       protectedRole: '禁止操作：无法删除受保护的角色',
       protectedUser: '禁止操作：无法删除受保护的用户',
       protectedSensor: '禁止操作：无法删除受保护的传感器',
@@ -66,11 +71,16 @@ const statusMessages = {
         cannotDeleteAdmin: 'Forbidden operation: Cannot delete admin role',
         protectedPermission:
           'Prohibited operation: Protected permission entry cannot be deleted',
+        protectedDictionary:
+          'Prohibited operation: Protected dictionary entry cannot be deleted',
         protectedRole: 'Forbidden operation: Protected role cannot be deleted',
         protectedUser: 'Forbidden operation: Protected user cannot be deleted',
-        protectedSensor: 'Forbidden operation: Protected sensor cannot be deleted',
-        protectedBarcode: 'Forbidden operation: Protected barcode cannot be deleted',
-        protectedPosition: 'Forbidden operation: Protected position cannot be deleted',
+        protectedSensor:
+          'Forbidden operation: Protected sensor cannot be deleted',
+        protectedBarcode:
+          'Forbidden operation: Protected barcode cannot be deleted',
+        protectedPosition:
+          'Forbidden operation: Protected position cannot be deleted',
       },
       ja: {
         default: '禁止操作',
@@ -78,6 +88,8 @@ const statusMessages = {
         cannotDeleteAdmin: '禁止操作: 管理者ロールを削除できません',
         protectedPermission:
           '禁止操作: 保護されているパーミッションエントリを削除できません',
+        protectedDictionary:
+          '禁止操作: 保護されている辞書エントリを削除できません',
         protectedRole: '禁止操作: 保護されたロールは削除できません',
         protectedUser: '禁止操作: 保護されたユーザーは削除できません',
         protectedSensor: '禁止操作: 保護されたセンサーは削除できません',
@@ -94,7 +106,7 @@ const statusMessages = {
       roleNotFound: '未找到角色',
       barcodeNotFound: '未找到条形码',
       positionNotFound: '未找到库位码',
-      dictionariesNotFound: '未找到字典',
+      dictionaryNotFound: '未找到字典',
       sensorNotFound: '未找到传感器',
       permissionNotFound: '未找到权限词条',
     },
@@ -105,7 +117,7 @@ const statusMessages = {
         roleNotFound: 'Role Not Found',
         barcodeNotFound: 'Barcode Not Found',
         positionNotFound: 'Position Not Found',
-        dictionariesNotFound: 'Dictionaries Not Found',
+        dictionaryNotFound: 'Dictionaries Not Found',
         sensorNotFound: 'Sensor Not Found',
         permissionNotFound: 'Permission entry Not Found',
       },
@@ -115,7 +127,7 @@ const statusMessages = {
         roleNotFound: 'ロールが見つからない',
         barcodeNotFound: 'バーコードが見つからない',
         positionNotFound: 'ポジションが見つからない',
-        dictionariesNotFound: '辞書が見つからない',
+        dictionaryNotFound: '辞書が見つからない',
         sensorNotFound: 'センサーが見つからない',
         permissionNotFound: 'パーミッションエントリが見つからない',
       },

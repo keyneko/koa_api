@@ -6,7 +6,7 @@ const { insertUsers, assignAdminRoleToUser } = require('./users')
 const { insertPermissions } = require('./permission')
 const { insertBarcodes } = require('./barcodes')
 const { insertPositions } = require('./positions')
-const { insertDictionaries } = require('./dictionaries')
+const { insertDictionaries } = require('./dictionary')
 const { insertSensors } = require('./sensors')
 
 // Execute the functions in sequence using async/await

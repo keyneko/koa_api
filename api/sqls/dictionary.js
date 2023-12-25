@@ -1,7 +1,7 @@
 const Dictionary = require('../models/dictionary')
 const { logger } = require('../utils/logger')
 
-// Inserting barcode status dictionaries
+// Inserting barcode status dictionary
 async function insertBarcodeStatus() {
   try {
     const data = [
@@ -9,6 +9,7 @@ async function insertBarcodeStatus() {
         key: 'barcode_status',
         value: 0,
         name: '默认',
+        isProtected: true,
         translations: {
           en: 'Default',
           ja: 'デフォルト',
@@ -18,6 +19,7 @@ async function insertBarcodeStatus() {
         key: 'barcode_status',
         value: 1,
         name: '在库',
+        isProtected: true,
         translations: {
           en: 'In stock',
           ja: '在庫あり',
@@ -27,6 +29,7 @@ async function insertBarcodeStatus() {
         key: 'barcode_status',
         value: 2,
         name: '在途',
+        isProtected: true,
         translations: {
           en: 'In transit',
           ja: '途中で',
@@ -36,6 +39,7 @@ async function insertBarcodeStatus() {
         key: 'barcode_status',
         value: 3,
         name: '已报废',
+        isProtected: true,
         translations: {
           en: 'Scrapped',
           ja: '廃棄された',
@@ -45,6 +49,7 @@ async function insertBarcodeStatus() {
         key: 'barcode_status',
         value: 4,
         name: '已报失',
+        isProtected: true,
         translations: {
           en: 'Lost',
           ja: '失った',
@@ -59,13 +64,13 @@ async function insertBarcodeStatus() {
 
     await Promise.all(promises)
 
-    logger.info('Barcode status dictionaries inserted successfully.')
+    logger.info('Barcode status dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting barcode status dictionaries.')
+    logger.error('Error inserting barcode status dictionary.')
   }
 }
 
-// Inserting position stackable dictionaries
+// Inserting position stackable dictionary
 async function insertPositionStackable() {
   try {
     const data = [
@@ -73,6 +78,7 @@ async function insertPositionStackable() {
         key: 'position_stackable',
         value: 0,
         name: '不可堆叠',
+        isProtected: true,
         translations: {
           en: 'Not stackable',
           ja: 'スタッキング不可',
@@ -82,6 +88,7 @@ async function insertPositionStackable() {
         key: 'position_stackable',
         value: 1,
         name: '可堆叠',
+        isProtected: true,
         translations: {
           en: 'Stackable',
           ja: 'スタッキング可能',
@@ -96,13 +103,13 @@ async function insertPositionStackable() {
 
     await Promise.all(promises)
 
-    logger.info('Position stackable dictionaries inserted successfully.')
+    logger.info('Position stackable dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting position stackable dictionaries.')
+    logger.error('Error inserting position stackable dictionary.')
   }
 }
 
-// Inserting status dictionaries
+// Inserting status dictionary
 async function insertStatus() {
   try {
     const data = [
@@ -110,6 +117,7 @@ async function insertStatus() {
         key: 'status',
         value: 0,
         name: '无效',
+        isProtected: true,
         translations: {
           en: 'Invalid',
           ja: '無効',
@@ -119,6 +127,7 @@ async function insertStatus() {
         key: 'status',
         value: 1,
         name: '有效',
+        isProtected: true,
         translations: {
           en: 'Valid',
           ja: '有効',
@@ -133,13 +142,13 @@ async function insertStatus() {
 
     await Promise.all(promises)
 
-    logger.info('Status dictionaries inserted successfully.')
+    logger.info('Status dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting status dictionaries.')
+    logger.error('Error inserting status dictionary.')
   }
 }
 
-// Inserting sop dictionaries
+// Inserting sop dictionary
 async function insertSops() {
   try {
     const data = [
@@ -147,6 +156,7 @@ async function insertSops() {
         key: 'sops',
         value: 0,
         name: '角色管理',
+        isProtected: true,
         translations: {
           en: 'Roles Management',
           ja: 'ロール管理',
@@ -156,6 +166,7 @@ async function insertSops() {
         key: 'sops',
         value: 1,
         name: '用户管理',
+        isProtected: true,
         translations: {
           en: 'Users Management',
           ja: 'ユーザー管理',
@@ -165,8 +176,9 @@ async function insertSops() {
         key: 'sops',
         value: 2,
         name: '条码生成',
+        isProtected: true,
         translations: {
-          en: 'Barcode Generate',
+          en: 'Barcode Create',
           ja: 'バーコード生成',
         },
       },
@@ -174,6 +186,7 @@ async function insertSops() {
         key: 'sops',
         value: 3,
         name: '条码管理',
+        isProtected: true,
         translations: {
           en: 'Barcode Management',
           ja: 'バーコード管理',
@@ -183,8 +196,9 @@ async function insertSops() {
         key: 'sops',
         value: 4,
         name: '库位码生成',
+        isProtected: true,
         translations: {
-          en: 'Position Generate',
+          en: 'Position Create',
           ja: 'ポジションコード生成',
         },
       },
@@ -192,6 +206,7 @@ async function insertSops() {
         key: 'sops',
         value: 5,
         name: '库位码管理',
+        isProtected: true,
         translations: {
           en: 'Position Management',
           ja: 'ポジションコード管理',
@@ -206,13 +221,13 @@ async function insertSops() {
 
     await Promise.all(promises)
 
-    logger.info('Sops dictionaries inserted successfully.')
+    logger.info('Sops dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting sops dictionaries.')
+    logger.error('Error inserting sops dictionary.')
   }
 }
 
-// Inserting sensor types dictionaries
+// Inserting sensor types dictionary
 async function insertSensorTypes() {
   try {
     const data = [
@@ -220,6 +235,7 @@ async function insertSensorTypes() {
         key: 'sensor_type',
         value: 0,
         name: '温湿度传感器',
+        isProtected: true,
         translations: {
           en: 'Temperature & Humidity Sensor',
           ja: '温湿度センサー',
@@ -234,13 +250,13 @@ async function insertSensorTypes() {
 
     await Promise.all(promises)
 
-    logger.info('Sensor types dictionaries inserted successfully.')
+    logger.info('Sensor types dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting sensor types dictionaries.')
+    logger.error('Error inserting sensor types dictionary.')
   }
 }
 
-// Inserting other miscellaneous dictionaries
+// Inserting other miscellaneous dictionary
 async function insertMiscellaneous() {
   try {
     const data = [
@@ -248,6 +264,7 @@ async function insertMiscellaneous() {
         key: 'online',
         value: 0,
         name: '离线',
+        isProtected: true,
         translations: {
           en: 'Offline',
           ja: 'オフライン',
@@ -257,6 +274,7 @@ async function insertMiscellaneous() {
         key: 'online',
         value: 1,
         name: '在线',
+        isProtected: true,
         translations: {
           en: 'Online',
           ja: 'オンライン',
@@ -266,6 +284,7 @@ async function insertMiscellaneous() {
         key: 'yes_or_no',
         value: 0,
         name: '否',
+        isProtected: true,
         translations: {
           en: 'No',
           ja: 'いいえ',
@@ -275,6 +294,7 @@ async function insertMiscellaneous() {
         key: 'yes_or_no',
         value: 1,
         name: '是',
+        isProtected: true,
         translations: {
           en: 'Yes',
           ja: 'はい',
@@ -289,9 +309,9 @@ async function insertMiscellaneous() {
 
     await Promise.all(promises)
 
-    logger.info('Sensor types dictionaries inserted successfully.')
+    logger.info('Sensor types dictionary inserted successfully.')
   } catch (error) {
-    logger.error('Error inserting sensor types dictionaries.')
+    logger.error('Error inserting sensor types dictionary.')
   }
 }
 

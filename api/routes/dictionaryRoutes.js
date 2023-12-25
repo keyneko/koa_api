@@ -10,18 +10,32 @@ dictionaryRouter.get(
   dictionaryController.getDictionaries,
 )
 
-// Create dictionaries
-dictionaryRouter.post(
-  '/dictionaries',
-  authController.isAdmin,
-  dictionaryController.createDictionaries,
+// Get a dictionary
+dictionaryRouter.get(
+  '/dictionary',
+  authController.hasToken,
+  dictionaryController.getDictionary,
 )
 
-// Delete dictionaries
-dictionaryRouter.delete(
-  '/dictionaries',
+// Create a dictionary
+dictionaryRouter.post(
+  '/dictionary',
   authController.isAdmin,
-  dictionaryController.deleteDictionaries,
+  dictionaryController.createDictionary,
+)
+
+// Update a dictionary
+dictionaryRouter.put(
+  '/dictionary',
+  authController.isAdmin,
+  dictionaryController.updateDictionary,
+)
+
+// Delete a dictionary
+dictionaryRouter.delete(
+  '/dictionary',
+  authController.isAdmin,
+  dictionaryController.deleteDictionary,
 )
 
 module.exports = dictionaryRouter

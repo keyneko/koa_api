@@ -51,6 +51,7 @@ async function insertRoles() {
       {
         name: '巡检员',
         value: 'patrol inspector',
+        isProtected: true,
         sops: [],
         translations: {
           en: 'Patrol Inspector',

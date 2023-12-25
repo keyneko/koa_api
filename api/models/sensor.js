@@ -31,6 +31,10 @@ const sensorSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isPublic: {
+    type: Boolean,
+    default: false,
+  },
   subscriptions: {
     type: mongoose.Schema.Types.Mixed,
     default: [],

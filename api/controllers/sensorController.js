@@ -19,7 +19,10 @@ async function getSensors(ctx) {
     const query = {}
 
     if (!isAdmin) {
-      query.createdBy = createdBy
+      query.$or = [
+        { createdBy: createdBy },
+        { isPublic: true }
+      ];
     }
 
     // Fuzzy search for name (case-insensitive)
@@ -63,8 +66,9 @@ async function getSensors(ctx) {
       'manufacturer',
       'apiKey',
       'status',
-      'isProtected',
       'isOnline',
+      'isProtected',
+      'isPublic',
       'subscriptions',
       'translations',
     ])
@@ -89,7 +93,7 @@ async function getSensors(ctx) {
 
 async function createSensor(ctx) {
   try {
-    const { name, number, type, isProtected, manufacturer } = ctx.request.body
+    const { name, number, type, isProtected, isPublic, manufacturer } = ctx.request.body
     const language = ctx.cookies.get('language')
     const decoded = ctx.state.decoded
 
@@ -103,6 +107,7 @@ async function createSensor(ctx) {
       number,
       apiKey,
       isProtected,
+      isPublic,
       createdBy: decoded.userId,
     })
 
@@ -134,7 +139,7 @@ async function createSensor(ctx) {
 
 async function updateSensor(ctx) {
   try {
-    const { _id, name, number, manufacturer, type, status, isProtected } =
+    const { _id, name, number, manufacturer, type, status, isProtected, isPublic } =
       ctx.request.body
     const language = ctx.cookies.get('language')
 
@@ -177,6 +182,7 @@ async function updateSensor(ctx) {
     if (number !== undefined) sensor.number = number
     if (status !== undefined) sensor.status = status
     if (isProtected !== undefined) sensor.isProtected = isProtected
+    if (isPublic !== undefined) sensor.isPublic = isPublic
 
     await sensor.save()
 

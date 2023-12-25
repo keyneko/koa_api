@@ -49,6 +49,19 @@ async function insertPermissions() {
         },
       },
 
+      // Dictionaries
+      {
+        name: '字典词条',
+        pattern: 'dictionaries:*:*',
+        isProtected: true,
+        translations: {
+          name: {
+            en: 'Dictionaries',
+            ja: '辞書エントリ',
+          },
+        },
+      },
+
       // Barcodes
       {
         name: '条码',
@@ -85,7 +98,7 @@ async function insertPermissions() {
         pattern: 'barcodes:management:create',
         translations: {
           name: {
-            en: 'Barcode Generate',
+            en: 'Barcode Create',
             ja: 'バーコード生成',
           },
         },
@@ -147,7 +160,7 @@ async function insertPermissions() {
         pattern: 'positions:management:create',
         translations: {
           name: {
-            en: 'Position Generate',
+            en: 'Position Create',
             ja: 'ポジションコード生成',
           },
         },
@@ -185,12 +198,42 @@ async function insertPermissions() {
         },
       },
       {
-        name: '温湿度传感器',
-        pattern: 'sensors:dht11:*',
+        name: '传感器生成',
+        pattern: 'sensors:management:create',
         translations: {
           name: {
-            en: 'Temperature & Humidity Sensor',
-            ja: '温湿度センサー',
+            en: 'Sensor Create',
+            ja: 'センサー生成',
+          },
+        },
+      },
+      {
+        name: '传感器删除',
+        pattern: 'sensors:management:delete',
+        translations: {
+          name: {
+            en: 'Sensor Delete',
+            ja: 'センサー削除',
+          },
+        },
+      },
+      {
+        name: '传感器更新',
+        pattern: 'sensors:management:update',
+        translations: {
+          name: {
+            en: 'Sensor Update',
+            ja: 'センサー更新',
+          },
+        },
+      },
+      {
+        name: '传感器推送消息',
+        pattern: 'sensors:management:publish',
+        translations: {
+          name: {
+            en: 'Sensor Publish',
+            ja: 'センサープッシュ',
           },
         },
       },

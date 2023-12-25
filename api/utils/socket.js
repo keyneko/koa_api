@@ -45,7 +45,7 @@ function initializeSocket(server) {
     console.log('Broadcast message:', data)
 
     io.emit('broadcastMessage', data)
-  }, 10000)
+  }, 60 * 1000)
 
   return io
 }

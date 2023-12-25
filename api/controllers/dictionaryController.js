@@ -4,26 +4,73 @@ const { getErrorMessage, statusCodes } = require('../utils/statusCodes')
 
 async function getDictionaries(ctx) {
   try {
+    const { pageNum = 1, pageSize = 10, key, status } = ctx.query
+    const language = ctx.cookies.get('language')
+
+    const filter = {}
+    if (status !== undefined && status !== '') {
+      filter.status = status
+    }
+
+    // Fuzzy search for name (case-insensitive)
+    if (key !== undefined && key !== '') {
+      filter.key = { $regex: new RegExp(key, 'i') }
+    }
+
+    const skip = (pageNum - 1) * pageSize
+    const limit = parseInt(pageSize)
+
+    const [dictionaries, total] = await Promise.all([
+      Dictionary.find(filter)
+        .select([
+          'key',
+          'value',
+          'name',
+          'status',
+          'isProtected',
+          'translations',
+        ])
+        .sort({ key: 1, value: 1 })
+        .skip(skip)
+        .limit(limit),
+      Dictionary.countDocuments(filter),
+    ])
+
+    ctx.body = {
+      code: 200,
+      data: dictionaries.map((dictionary) => ({
+        ...dictionary.toObject(),
+        name: dictionary.translations?.get(language) || dictionary.name,
+        translations: undefined,
+      })),
+      total,
+    }
+  } catch (error) {
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
+    logger.error(error.message)
+  }
+}
+
+async function getDictionary(ctx) {
+  try {
     const { key } = ctx.query
     const language = ctx.cookies.get('language')
 
-    // Query the dictionaries based on the key
-    const dictionaries = await Dictionary.find({ key }).select([
+    // Query the dictionary based on the key
+    const dictionary = await Dictionary.find({ key }).select([
       'value',
       'name',
       'translations',
     ])
 
-    // Map over the dictionaries to retrieve translated names or use default names
-    const mappedDictionaries = dictionaries.map((dictionary) => ({
-      value: dictionary.value,
-      name: dictionary.translations?.get(language) || dictionary.name,
-    }))
-
     ctx.status = 200
     ctx.body = {
       code: 200,
-      data: mappedDictionaries,
+      data: dictionary.map((d) => ({
+        value: d.value,
+        name: d.translations?.get(language) || d.name,
+      })),
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -32,53 +79,28 @@ async function getDictionaries(ctx) {
   }
 }
 
-async function createDictionaries(ctx) {
+async function createDictionary(ctx) {
   try {
-    const { key, names } = ctx.request.body
+    const { key, value, name, isProtected } = ctx.request.body
     const language = ctx.cookies.get('language')
 
-    // Use map to create an array of promises
-    const dictionaryPromises = names.map(async (name, value) => {
-      // Check if the dictionary with the given key and value already exists
-      const existingDictionary = await Dictionary.findOne({ key, value })
-
-      // If it exists, update the dictionary
-      if (existingDictionary) {
-        // Update the name if language is 'zh' or undefined
-        if (language === 'zh' || language === undefined) {
-          existingDictionary.name = name
-        } else {
-          // Ensure translations is initialized as a Map
-          existingDictionary.translations =
-            existingDictionary.translations || new Map()
-          // Handle updating translations for Map data type
-          existingDictionary.translations.set(language, name)
-        }
-
-        return existingDictionary.save()
-      } else {
-        // If it doesn't exist, create a new dictionary
-        const newDictionary = new Dictionary({
-          key,
-          value,
-        })
-
-        // Set the name or translations based on the language
-        if (language === 'zh' || language === undefined) {
-          newDictionary.name = name
-        } else {
-          newDictionary.translations = { [language]: name }
-        }
-
-        return newDictionary.save()
-      }
+    const dictionary = new Dictionary({
+      key,
+      value,
+      name,
+      isProtected,
     })
 
-    // Use Promise.all to await all promises in parallel
-    await Promise.all(dictionaryPromises)
+    if (language === 'zh' || language === undefined) {
+    } else {
+      dictionary.translations = { [language]: name }
+    }
+
+    await dictionary.save()
 
     ctx.body = {
       code: 200,
+      data: dictionary._id,
     }
   } catch (error) {
     ctx.status = statusCodes.InternalServerError
@@ -87,20 +109,106 @@ async function createDictionaries(ctx) {
   }
 }
 
-async function deleteDictionaries(ctx) {
+async function updateDictionary(ctx) {
   try {
-    const key = ctx.query.key
+    const { _id, name, isProtected, status } = ctx.request.body
     const language = ctx.cookies.get('language')
 
-    const result = await Dictionary.deleteMany({ key })
+    // const dictionary = await Dictionary.findById(_id)
+    // if (!dictionary) {
+    //   ctx.status = statusCodes.NotFound
+    //   ctx.body = getErrorMessage(
+    //     statusCodes.NotFound,
+    //     language,
+    //     'dictionaryNotFound',
+    //   )
+    //   return
+    // }
 
-    if (result.deletedCount === 0) {
+    // if (language === 'zh' || language === undefined) {
+    // } else {
+    //   dictionary.translations.set(language, name)
+    //   dictionary.markModified('translations')
+    // }
+
+    // if (isProtected != undefined) dictionary.isProtected = isProtected
+    // if (status != undefined) dictionary.status = status
+
+    // await dictionary.save()
+
+    const updateFields = {}
+
+    if (language === 'zh' || language === undefined) {
+      updateFields.name = name
+    } else {
+      updateFields[`translations.${language}`] = name
+    }
+
+    if (isProtected !== undefined) {
+      updateFields.isProtected = isProtected
+    }
+
+    if (status !== undefined) {
+      updateFields.status = status
+    }
+
+    const result = await Dictionary.findByIdAndUpdate(
+      { _id },
+      { $set: updateFields },
+      { new: true },
+    )
+
+    if (!result) {
       ctx.status = statusCodes.NotFound
       ctx.body = getErrorMessage(
         statusCodes.NotFound,
         language,
-        'dictionariesNotFound',
+        'dictionaryNotFound',
       )
+      return
+    }
+
+    ctx.body = {
+      code: 200,
+    }
+  } catch (error) {
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
+    logger.error(error.message)
+  }
+}
+
+async function deleteDictionary(ctx) {
+  try {
+    const { _id } = ctx.query
+    const language = ctx.cookies.get('language')
+
+    const dictionary = await Dictionary.findById(_id)
+
+    if (!dictionary) {
+      ctx.status = statusCodes.NotFound
+      ctx.body = getErrorMessage(
+        statusCodes.NotFound,
+        language,
+        'dictionaryNotFound',
+      )
+      return
+    }
+
+    // Check if it is protected
+    if (dictionary.isProtected) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'protectedDictionary',
+      )
+      return
+    }
+
+    // If not protected, delete the dictionary
+    const result = await Dictionary.findByIdAndDelete(_id)
+    if (!result) {
       return
     }
 
@@ -117,6 +225,8 @@ async function deleteDictionaries(ctx) {
 
 module.exports = {
   getDictionaries,
-  createDictionaries,
-  deleteDictionaries,
+  getDictionary,
+  createDictionary,
+  updateDictionary,
+  deleteDictionary,
 }
