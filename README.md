@@ -1,5 +1,6 @@
 # 查看Ubuntu版本信息
 ```bash
+ssh ubuntu@118.24.152.123 f3WmQEB-LYm28xw
 lsb_release -a
 ```
 
