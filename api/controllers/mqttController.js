@@ -3,6 +3,7 @@ const aedes = require('aedes')()
 const Sensor = require('../models/sensor')
 const SensorStatus = require('../models/sensorStatus')
 const { mqtt: logger } = require('../utils/logger')
+const { broadcastMessage } = require('../utils/socket')
 
 async function authenticate(client, username, password, callback) {
   try {
@@ -41,6 +42,8 @@ async function processStatusData(client, packet) {
       status,
     })
     await sensorStatus.save()
+
+    broadcastMessage("newSensorDataArrived")
 
     logger.info(`Status data saved for client ${sensorId}`)
   } catch (error) {

@@ -26,7 +26,7 @@ dotenv.config({ path: envFile })
 
 const app = new Koa()
 const server = http.createServer(app.callback())
-const io = initializeSocket(server)
+initializeSocket(server)
 
 // Connect to MongoDB
 const MONGODB_URI = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`

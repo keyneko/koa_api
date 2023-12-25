@@ -3,9 +3,10 @@ const socketIO = require('socket.io')
 const { verifyToken } = require('../controllers/authController')
 
 const connectedClients = new Map()
+let io = null
 
 function initializeSocket(server) {
-  const io = socketIO(server)
+  io = socketIO(server)
 
   io.on('connection', async (socket) => {
     const token = socket.handshake.auth.token
@@ -39,15 +40,12 @@ function initializeSocket(server) {
       connectedClients.delete(socket.id)
     })
   })
+}
 
-  setInterval(() => {
-    const data = 'This is a broadcast message!'
-    console.log('Broadcast message:', data)
-
-    io.emit('broadcastMessage', data)
-  }, 60 * 1000)
-
-  return io
+function broadcastMessage(name, data) {
+  if (io) {
+    io.emit(name, data)
+  }
 }
 
 // // 通过 connectedClients Map 对象可以向特定客户端发送消息
@@ -58,4 +56,4 @@ function initializeSocket(server) {
 //   }
 // }
 
-module.exports = { initializeSocket }
+module.exports = { initializeSocket, broadcastMessage }
