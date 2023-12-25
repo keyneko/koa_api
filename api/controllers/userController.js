@@ -126,6 +126,63 @@ async function getUser(ctx) {
   }
 }
 
+async function createUser(ctx) {
+  try {
+    const { username, password, name, isProtected, roles } = ctx.request.body
+    const language = ctx.cookies.get('language')
+
+    // Check if the username already exists
+    const user = await User.findOne({ username })
+    if (user) {
+      ctx.status = statusCodes.UserExists
+      ctx.body = getErrorMessage(statusCodes.UserExists, language)
+      return
+    }
+
+    // Decrypt the encrypted password
+    const decryptedPassword = decryptPassword(password)
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(decryptedPassword, 10)
+
+    // Create a new user
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      name,
+      isProtected,
+    })
+
+    // Handle translations based on the language value
+    if (language === 'zh' || language === undefined) {
+    } else {
+      if (name !== undefined) {
+        newUser.translations = user.translations || new Map()
+        newUser.translations.set(language, name)
+        newUser.markModified('translations')
+      }
+    }
+
+    // Convert value array to _id array for roles
+    if (roles !== undefined) {
+      const roleObjects = await Role.find({ value: { $in: roles } }, '_id')
+      newUser.roles = roleObjects.map((role) => role._id)
+    }
+
+    // Save the user to the database
+    await newUser.save()
+
+    ctx.status = 200
+    ctx.body = {
+      code: 200,
+    }
+  } catch (error) {
+    ctx.status = statusCodes.InternalServerError
+    ctx.body = error.message
+    logger.error(error.message)
+  }
+}
+
 async function updateUser(ctx) {
   try {
     const userId = ctx.state.decoded.userId
@@ -184,14 +241,11 @@ async function updateUser(ctx) {
     if (language === 'zh' || language === undefined) {
       user.name = name || user.name
     } else {
-      // Update translations based on the specified language
-      if (name) {
+      if (name !== undefined) {
         user.translations = user.translations || new Map()
         user.translations.set(language, name)
+        user.markModified('translations')
       }
-
-      // Mark the modified fields to ensure they are saved
-      user.markModified('translations')
     }
 
     if (avatar !== undefined) user.avatar = avatar
@@ -241,17 +295,6 @@ async function deleteUser(ctx) {
       return
     }
 
-    // Check if the user being deleted has admin role
-    if (user.roles.some((role) => role.isAdmin)) {
-      ctx.status = statusCodes.Forbidden
-      ctx.body = getErrorMessage(
-        statusCodes.Forbidden,
-        language,
-        'cannotDeleteAdmin',
-      )
-      return
-    }
-
     // Check if it is protected
     if (user.isProtected) {
       ctx.status = statusCodes.Forbidden
@@ -259,6 +302,17 @@ async function deleteUser(ctx) {
         statusCodes.Forbidden,
         language,
         'protectedUser',
+      )
+      return
+    }
+
+    // Check if the user being deleted has admin role
+    if (user.roles.some((role) => role.isAdmin)) {
+      ctx.status = statusCodes.Forbidden
+      ctx.body = getErrorMessage(
+        statusCodes.Forbidden,
+        language,
+        'cannotDeleteAdmin',
       )
       return
     }
@@ -283,6 +337,7 @@ async function deleteUser(ctx) {
 module.exports = {
   getUsers,
   getUser,
+  createUser,
   updateUser,
   deleteUser,
 }

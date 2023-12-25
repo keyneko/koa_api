@@ -39,6 +39,10 @@ const barcodeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 })
 
 const Barcode = mongoose.model('Barcode', barcodeSchema)

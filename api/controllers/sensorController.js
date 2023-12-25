@@ -12,8 +12,15 @@ async function getSensors(ctx) {
   try {
     const { name, type, number, manufacturer, status } = ctx.query
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
+    const createdBy = decoded.userId
+    const isAdmin = (decoded.roles || []).some((role) => role.isAdmin)
 
     const query = {}
+
+    if (!isAdmin) {
+      query.createdBy = createdBy
+    }
 
     // Fuzzy search for name (case-insensitive)
     if (name !== undefined && name !== '') {
@@ -62,9 +69,6 @@ async function getSensors(ctx) {
       'translations',
     ])
 
-    const decoded = ctx.state.decoded
-    const isAdmin = (decoded.roles || []).some((role) => role.isAdmin)
-
     ctx.status = 200
     ctx.body = {
       code: 200,
@@ -74,7 +78,6 @@ async function getSensors(ctx) {
         manufacturer:
           sensor.translations?.manufacturer?.[language] || sensor.manufacturer,
         translations: undefined,
-        apiKey: isAdmin ? sensor.apiKey : undefined,
       })),
     }
   } catch (error) {
@@ -88,6 +91,7 @@ async function createSensor(ctx) {
   try {
     const { name, number, type, isProtected, manufacturer } = ctx.request.body
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
 
     // Generate a new API key using uuid
     const apiKey = uuid.v4()
@@ -99,6 +103,7 @@ async function createSensor(ctx) {
       number,
       apiKey,
       isProtected,
+      createdBy: decoded.userId,
     })
 
     // Handle translations based on language

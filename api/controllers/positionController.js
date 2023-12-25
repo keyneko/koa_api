@@ -57,6 +57,9 @@ async function getPositions(ctx) {
   try {
     const { pageNum = 1, pageSize = 10, status, isStackable } = ctx.query
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
+    const createdBy = decoded.userId
+    const isAdmin = (decoded.roles || []).some((role) => role.isAdmin)
 
     const filter = {}
     if (status !== undefined && status !== '') {
@@ -64,6 +67,9 @@ async function getPositions(ctx) {
     }
     if (isStackable !== undefined && isStackable !== '') {
       filter.isStackable = isStackable
+    }
+    if (!isAdmin) {
+      filter.createdBy = createdBy
     }
 
     const skip = (pageNum - 1) * pageSize
@@ -155,6 +161,7 @@ async function createPosition(ctx) {
       files,
     } = ctx.request.body
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
 
     const value = await generatePosition(areaCode, buildingCode, floorCode)
 
@@ -164,6 +171,7 @@ async function createPosition(ctx) {
       status,
       isStackable,
       files,
+      createdBy: decoded.userId,
     })
 
     // Handle translations based on the language value

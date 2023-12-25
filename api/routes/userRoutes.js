@@ -9,6 +9,9 @@ userRouter.get('/users', authController.isAdmin, userController.getUsers)
 // Get user information
 userRouter.get('/user', authController.hasToken, userController.getUser)
 
+// Post user information
+userRouter.post('/user', authController.isAdmin, userController.createUser)
+
 // Update a user
 userRouter.put('/user', authController.hasToken, userController.updateUser)
 

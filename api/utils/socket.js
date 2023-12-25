@@ -40,6 +40,13 @@ function initializeSocket(server) {
     })
   })
 
+  setInterval(() => {
+    const data = 'This is a broadcast message!'
+    console.log('Broadcast message:', data)
+
+    io.emit('broadcastMessage', data)
+  }, 10000)
+
   return io
 }
 

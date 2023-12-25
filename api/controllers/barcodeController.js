@@ -59,10 +59,16 @@ async function getBarcodes(ctx) {
   try {
     const { pageNum = 1, pageSize = 10, status } = ctx.query
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
+    const createdBy = decoded.userId
+    const isAdmin = (decoded.roles || []).some((role) => role.isAdmin)
 
     const filter = {}
     if (status !== undefined && status !== '') {
       filter.status = status
+    }
+    if (!isAdmin) {
+      filter.createdBy = createdBy
     }
 
     const skip = (pageNum - 1) * pageSize
@@ -160,6 +166,7 @@ async function createBarcode(ctx) {
       files,
     } = ctx.request.body
     const language = ctx.cookies.get('language')
+    const decoded = ctx.state.decoded
 
     const value = await generateBarcode(category)
     const newBarcode = new Barcode({
@@ -169,6 +176,7 @@ async function createBarcode(ctx) {
       quantity,
       status,
       files,
+      createdBy: decoded.userId,
     })
 
     // Handle translations based on the language value

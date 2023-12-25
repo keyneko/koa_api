@@ -39,6 +39,10 @@ const sensorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 })
 
 const Sensor = mongoose.model('Sensor', sensorSchema)
