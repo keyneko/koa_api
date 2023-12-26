@@ -1,6 +1,7 @@
 // socket.js
 const socketIO = require('socket.io')
 const { verifyToken } = require('../controllers/authController')
+const { socket: logger } = require('../utils/logger')
 
 const connectedClients = new Map()
 let io = null
@@ -14,11 +15,11 @@ function initializeSocket(server) {
     const decoded = await verifyToken(token)
     if (!decoded) {
       socket.disconnect()
-      console.error('Authentication failed: Invalid token', socket.id)
+      logger.error('Authentication failed: Invalid token, ' + socket.id)
       return
     }
 
-    console.log('Client connected:', socket.id)
+    logger.info('Client connected: ' + socket.id)
 
     connectedClients.set(socket.id, {
       userId: decoded.userId,
@@ -27,14 +28,15 @@ function initializeSocket(server) {
 
     // Add the logic after connection here
     socket.on('joinRoom', (data) => {
-      console.log('Received:', data)
+      logger.info('Received: ')
+      logger.info(data)
 
       socket.emit('message', 'Hello, client!')
     })
 
     // Triggered when client disconnects
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id)
+      logger.info('Client disconnected: ' + socket.id)
 
       // Removed from Map when client disconnects
       connectedClients.delete(socket.id)
@@ -44,6 +46,9 @@ function initializeSocket(server) {
 
 function broadcastMessage(name, data) {
   if (io) {
+    logger.info('Broadcast message for : ' + name)
+    logger.info(data)
+
     io.emit(name, data)
   }
 }

@@ -46,10 +46,16 @@ const mqtt = winston.createLogger({
   transports: transports('mqtt-%DATE%.log'),
 })
 
+const socket = winston.createLogger({
+  format,
+  transports: transports('socket-%DATE%.log'),
+})
+
 // Add a console transport for logging to the console during development
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({ format }))
-  // mqtt.add(new winston.transports.Console({ format }))
+  mqtt.add(new winston.transports.Console({ format }))
+  socket.add(new winston.transports.Console({ format }))
 }
 
 // Log system startup information
@@ -59,4 +65,4 @@ logger.info('= Welcome to the application!            =')
 logger.info('= ====================================== =')
 
 // Export the configured logger
-module.exports = { logger, frontend, mqtt }
+module.exports = { logger, frontend, mqtt, socket }

@@ -34,7 +34,7 @@ sensorRouter.delete(
 // Publish a message to clinet
 sensorRouter.post(
   '/sensor/publish',
-  authController.isAdmin,
+  authController.hasToken,
   sensorController.publishMessage,
 )
 

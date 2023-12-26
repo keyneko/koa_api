@@ -32,10 +32,17 @@ async function authenticate(client, username, password, callback) {
   }
 }
 
-async function processStatusData(client, packet) {
+async function processDht11Data(client, packet) {
   try {
     const sensorId = client.id
-    const status = JSON.parse(packet.payload.toString())
+    const payload = packet.payload.toString()
+    let status
+
+    try {
+      status = JSON.parse(payload)
+    } catch (error) {
+      status = payload
+    }
 
     const sensorStatus = new SensorStatus({
       sensorId,
@@ -43,7 +50,26 @@ async function processStatusData(client, packet) {
     })
     await sensorStatus.save()
 
-    broadcastMessage("newSensorDataArrived")
+    broadcastMessage('newSensorDataArrived', payload)
+
+    logger.info(`Status data saved for client ${sensorId}`)
+  } catch (error) {
+    logger.error('Error processing MQTT client status data: ')
+    logger.error(error.message)
+  }
+}
+
+async function processRgbLedData(client, packet) {
+  try {
+    const sensorId = client.id
+    const payload = packet.payload.toString()
+    const status = payload
+
+    const sensorStatus = new SensorStatus({
+      sensorId,
+      status,
+    })
+    await sensorStatus.save()
 
     logger.info(`Status data saved for client ${sensorId}`)
   } catch (error) {
@@ -154,7 +180,12 @@ async function onPublish(packet, client) {
 
     // Receive dht11 sensor status data
     if (topic.startsWith('dht11/status')) {
-      processStatusData(client, packet)
+      processDht11Data(client, packet)
+    }
+
+    // Receive rgb led sensor status data
+    if (topic.startsWith('rgb_led/status')) {
+      processRgbLedData(client, packet)
     }
   }
 }
