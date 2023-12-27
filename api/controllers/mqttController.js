@@ -81,8 +81,8 @@ async function processRgbLedData(client, packet) {
 async function updateOnlineStatus(sensorId, isOnline) {
   try {
     // Update the Sensor model's isOnline field
-    await Sensor.findByIdAndUpdate(sensorId, { isOnline })
-    logger.info(sensorId, isOnline ? 'online' : 'offline')
+    const result = await Sensor.findByIdAndUpdate(sensorId, { isOnline })
+    logger.info(sensorId + ' ' + (isOnline ? 'online' : 'offline'))
   } catch (error) {
     logger.error('Error updating sensor online status: ')
     logger.error(error.message)

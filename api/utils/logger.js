@@ -55,7 +55,7 @@ const socket = winston.createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({ format }))
   mqtt.add(new winston.transports.Console({ format }))
-  socket.add(new winston.transports.Console({ format }))
+  // socket.add(new winston.transports.Console({ format }))
 }
 
 // Log system startup information
